@@ -16,7 +16,7 @@ from walle.api import environment as EnvironmentAPI
 from walle.api import group as GroupAPI
 from walle.api import passport as PassportAPI
 from walle.api import project as ProjectAPI
-from walle.api import public as PublicAPI
+from walle.api import general as GeneralAPI
 from walle.api import role as RoleAPI
 from walle.api import server as ServerAPI
 from walle.api import task as TaskAPI
@@ -32,7 +32,7 @@ from walle.service.extensions import login_manager, mail
 from walle.service.websocket import WSHandler
 
 
-# TODO 添加到这,刚对单测有影响
+# TODO 添加到这,则对单测有影响
 app = Flask(__name__.split('.')[0])
 
 
@@ -41,7 +41,7 @@ def create_app(config_object=ProdConfig):
 
     :param config_object: The configuration object to use.
     """
-#    app = Flask(__name__.split('.')[0])
+    # app = Flask(__name__.split('.')[0])
     app.config.from_object(config_object)
     register_extensions(app)
     register_blueprints(app)
@@ -78,11 +78,11 @@ def register_blueprints(app):
     """Register Flask blueprints."""
     api = Api(app)
     api.add_resource(BaseAPI.Base, '/', endpoint='root')
-    api.add_resource(PublicAPI.PublicAPI, '/api/public/<string:action>', endpoint='public')
+    api.add_resource(GeneralAPI.GeneralAPI, '/api/general/<string:action>', endpoint='general')
     api.add_resource(SpaceAPI.SpaceAPI, '/api/space/', '/api/space/<int:space_id>', endpoint='space')
     api.add_resource(DeployAPI.DeployAPI, '/api/deploy/', '/api/deploy/<int:task_id>', endpoint='deploy')
     api.add_resource(AccessAPI.AccessAPI, '/api/access/', '/api/access/<int:access_id>', endpoint='access')
-    api.add_resource(RoleAPI.RoleAPI, '/api/role/', '/api/role/<int:role_id>', endpoint='role')
+    api.add_resource(RoleAPI.RoleAPI, '/api/role/', endpoint='role')
     api.add_resource(GroupAPI.GroupAPI, '/api/group/', '/api/group/<int:group_id>', endpoint='group')
     api.add_resource(PassportAPI.PassportAPI, '/api/passport/', '/api/passport/<string:action>', endpoint='passport')
     api.add_resource(UserAPI.UserAPI, '/api/user/', '/api/user/<string:action>', '/api/user/<int:user_id>', endpoint='user')
@@ -192,7 +192,7 @@ class InfoFilter(logging.Filter):
         else:
             return 0
 
- # TODO optimize
+# TODO optimize
 @app.route('/api/websocket')
 def index():
 
