@@ -24,11 +24,11 @@ class RepoAPI(SecurityResource):
         """
         super(RepoAPI, self).get()
         project_id = request.args.get('project_id', '')
-        branch = request.args.get('branch', '')
+
 
         if action in self.actions:
             self_action = getattr(self, action.lower(), None)
-            return self_action(project_id=project_id, branch=branch)
+            return self_action(project_id=project_id)
         else:
             abort(404)
 
@@ -60,13 +60,14 @@ class RepoAPI(SecurityResource):
             'branches': branches,
         })
 
-    def commits(self, project_id, branch):
+    def commits(self, project_id):
         """
         fetch project list or one item
         /tag/
 
         :return:
         """
+        branch = request.args.get('branch', '')
         wi = Deployer(project_id=project_id)
         commits = wi.list_commit(branch)
 
