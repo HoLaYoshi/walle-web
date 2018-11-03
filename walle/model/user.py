@@ -67,7 +67,7 @@ class UserModel(UserMixin, SurrogatePK, Model):
         :param role_id:
         :return:
         """
-        self.query.filter_by(id=self.id).delete()
+        self.query.filter_by(id=self.id).update({'status': self.status_remove})
         return db.session.commit()
 
     def verify_password(self, password):
@@ -133,7 +133,7 @@ class UserModel(UserMixin, SurrogatePK, Model):
         :param size:
         :return:
         """
-        query = UserModel.query
+        query = UserModel.query.filter(UserModel.status.notin_([self.status_remove]))
         if kw:
             query = query.filter(or_(UserModel.username.like('%' + kw + '%'), UserModel.email.like('%' + kw + '%')))
         count = query.count()
@@ -390,7 +390,7 @@ class GroupModel(SurrogatePK, Model):
         :param size:
         :return:
         """
-        group = GroupModel.query
+        group = GroupModel.query.filter(GroupModel.status.notin_([self.status_remove]))
         if kw:
             group = group.filter_by(TagModel.name.like('%' + kw + '%'))
         group = group.offset(int(size) * int(page)).limit(size).all()
@@ -541,13 +541,13 @@ class GroupModel(SurrogatePK, Model):
         :return:
         """
         if group_id:
-            GroupModel.query.filter_by(group_id=group_id).delete()
+            GroupModel.query.filter_by(group_id=group_id).update({'status': self.status_remove})
         elif user_id:
-            GroupModel.query.filter_by(user_id=user_id).delete()
+            GroupModel.query.filter_by(user_id=user_id).update({'status': self.status_remove})
         elif self.group_id:
-            GroupModel.query.filter_by(group_id=self.group_id).delete()
+            GroupModel.query.filter_by(group_id=self.group_id).update({'status': self.status_remove})
         elif project_id:
-            GroupModel.query.filter_by(project_id=project_id).delete()
+            GroupModel.query.filter_by(project_id=project_id).update({'status': self.status_remove})
 
         return db.session.commit()
 
@@ -587,7 +587,7 @@ class SpaceModel(SurrogatePK, Model):
         :param size:
         :return:
         """
-        query = self.query
+        query = self.query.filter(SpaceModel.status.notin_([self.status_remove]))
         if kw:
             query = query.filter(SpaceModel.name.like('%' + kw + '%'))
         count = query.count()

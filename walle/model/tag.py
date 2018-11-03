@@ -27,7 +27,7 @@ class TagModel(SurrogatePK, Model):
     updated_at = db.Column(DateTime, default=current_time, onupdate=current_time)
 
     def list(self):
-        data = TagModel.query.filter_by(id=1).first()
+        data = TagModel.query.filter(TagModel.status.notin_([self.status_remove])).filter_by(id=1).first()
         # # return data.tag.count('*').to_json()
         # # print(data)
         # return []
@@ -39,7 +39,7 @@ class TagModel(SurrogatePK, Model):
         :param role_id:
         :return:
         """
-        TagModel.query.filter_by(id=tag_id).delete()
+        TagModel.query.filter_by(id=tag_id).update({'status': self.status_remove})
         return db.session.commit()
 
     def to_json(self):

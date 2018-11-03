@@ -68,7 +68,7 @@ class TaskModel(SurrogatePK, Model):
         :param kw:
         :return:
         """
-        query = TaskModel.query
+        query = TaskModel.query.filter(TaskModel.status.notin_([self.status_remove]))
         if kw:
             query = query.filter(TaskModel.name.like('%' + kw + '%'))
         count = query.count()
@@ -132,7 +132,7 @@ class TaskModel(SurrogatePK, Model):
         :return:
         """
         id = id if id else self.id
-        self.query.filter_by(id=id).delete()
+        self.query.filter_by(id=id).update({'status': self.status_remove})
         return db.session.commit()
 
     def to_json(self):
@@ -232,7 +232,7 @@ class EnvironmentModel(db.Model):
         :param kw:
         :return:
         """
-        query = self.query
+        query = self.query.filter(EnvironmentModel.status.notin_([self.status_remove]))
         if kw:
             query = query.filter(EnvironmentModel.name.like('%' + kw + '%'))
         count = query.count()
@@ -275,7 +275,7 @@ class EnvironmentModel(db.Model):
         :param role_id:
         :return:
         """
-        self.query.filter_by(id=self.id).delete()
+        self.query.filter_by(id=self.id).update({'status': self.status_remove})
         return db.session.commit()
 
     def to_json(self):
@@ -309,7 +309,7 @@ class ServerModel(SurrogatePK, Model):
         :param kw:
         :return:
         """
-        query = self.query
+        query = self.query.filter(ServerModel.status.notin_([self.status_remove]))
         if kw:
             query = query.filter(ServerModel.name.like('%' + kw + '%'))
         count = query.count()
@@ -361,7 +361,7 @@ class ServerModel(SurrogatePK, Model):
         :return:
         """
         id = id if id else self.id
-        self.query.filter_by(id=id).delete()
+        self.query.filter_by(id=id).update({'status': self.status_remove})
         return db.session.commit()
 
     @classmethod
@@ -436,7 +436,7 @@ class ProjectModel(SurrogatePK, Model):
         :param size:
         :return:
         """
-        query = self.query
+        query = self.query.filter(ProjectModel.status.notin_([self.status_remove]))
         if kw:
             query = query.filter(ProjectModel.name.like('%' + kw + '%'))
 
@@ -489,7 +489,7 @@ class ProjectModel(SurrogatePK, Model):
         :return:
         """
         role_id = role_id if role_id else self.id
-        ProjectModel.query.filter_by(id=role_id).delete()
+        ProjectModel.query.filter_by(id=role_id).update({'status': self.status_remove})
         return db.session.commit()
 
 
@@ -543,7 +543,7 @@ class TagModel(SurrogatePK, Model):
     updated_at = db.Column(DateTime, default=current_time, onupdate=current_time)
 
     def list(self):
-        data = TagModel.query.filter_by(id=1).first()
+        data = TagModel.query.filter(TagModel.status.notin_([self.status_remove])).filter_by(id=1).first()
         # # return data.tag.count('*').to_json()
         # # print(data)
         # return []
@@ -555,7 +555,7 @@ class TagModel(SurrogatePK, Model):
         :param role_id:
         :return:
         """
-        TagModel.query.filter_by(id=tag_id).delete()
+        TagModel.query.filter_by(id=tag_id).update({'status': self.status_remove})
         return db.session.commit()
 
     def to_json(self):

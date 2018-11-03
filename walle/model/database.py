@@ -260,6 +260,8 @@ class Model(CRUDMixin, db.Model):
 
     __abstract__ = True
 
+    status_remove = -1
+
 
 # From Mike Bayer's "Building the app" talk
 # https://speakerdeck.com/zzzeek/building-the-app
