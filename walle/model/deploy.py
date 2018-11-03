@@ -93,7 +93,7 @@ class TaskModel(SurrogatePK, Model):
         :return:
         """
         id = id if id else self.id
-        data = self.query.filter_by(id=id).first()
+        data = self.query.filter(TaskModel.status.notin_([self.status_remove])).filter_by(id=id).first()
         if not data:
             return []
 
@@ -106,8 +106,6 @@ class TaskModel(SurrogatePK, Model):
     def add(self, *args, **kwargs):
         # todo permission_ids need to be formated and checked
         data = dict(*args)
-        f = open('run.log', 'w')
-        f.write('\n====add===\n' + str(data))
         project = TaskModel(**data)
 
         db.session.add(project)
@@ -159,7 +157,7 @@ class TaskModel(SurrogatePK, Model):
 
 
 # 上线记录表
-class TaskRecordModel(db.Model):
+class TaskRecordModel(Model):
     # 表的名字:
     __tablename__ = 'task_records'
     current_time = datetime.now()
@@ -209,7 +207,7 @@ class TaskRecordModel(db.Model):
 
 
 # 环境级别
-class EnvironmentModel(db.Model):
+class EnvironmentModel(Model):
     # 表的名字:
     __tablename__ = 'environments'
 
@@ -247,7 +245,7 @@ class EnvironmentModel(db.Model):
         :param role_id:
         :return:
         """
-        data = self.query.filter_by(id=self.id).first()
+        data = self.query.filter(EnvironmentModel.status.notin_([self.status_remove])).filter_by(id=self.id).first()
         return data.to_json() if data else []
 
     def add(self, env_name):
@@ -298,6 +296,7 @@ class ServerModel(SurrogatePK, Model):
     id = db.Column(Integer, primary_key=True, autoincrement=True)
     name = db.Column(String(100))
     host = db.Column(String(100))
+    status = db.Column(Integer)
     created_at = db.Column(DateTime, default=current_time)
     updated_at = db.Column(DateTime, default=current_time, onupdate=current_time)
 
@@ -327,12 +326,12 @@ class ServerModel(SurrogatePK, Model):
         :return:
         """
         id = id if id else self.id
-        data = self.query.filter_by(id=id).first()
+        data = self.query.filter(ServerModel.status.notin_([self.status_remove])).filter_by(id=id).first()
         return data.to_json() if data else []
 
     def add(self, name, host):
         # todo permission_ids need to be formated and checked
-        server = ServerModel(name=name, host=host)
+        server = ServerModel(name=name, host=host, status=self.status_available)
 
         db.session.add(server)
         db.session.commit()
@@ -454,7 +453,7 @@ class ProjectModel(SurrogatePK, Model):
         :return:
         """
         id = id if id else self.id
-        data = self.query.filter_by(id=id).first()
+        data = self.query.filter(ProjectModel.status.notin_([self.status_remove])).filter_by(id=id).first()
 
         if not data:
             return []

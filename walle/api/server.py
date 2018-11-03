@@ -71,7 +71,7 @@ class ServerAPI(SecurityResource):
             if not id:
                 return self.render_json(code=-1)
 
-            return self.render_json(data=server_new.item())
+            return self.render_json(data=server_new.item(id))
         else:
             return self.render_json(code=-1, message=form.errors)
 

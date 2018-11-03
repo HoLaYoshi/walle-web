@@ -261,6 +261,8 @@ class Model(CRUDMixin, db.Model):
     __abstract__ = True
 
     status_remove = -1
+    status_default = 0
+    status_available = 1
 
 
 # From Mike Bayer's "Building the app" talk
