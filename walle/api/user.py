@@ -8,7 +8,7 @@
     :author: wushuiyong@walle-web.io
 """
 import os
-from flask import request, current_app
+from flask import request, current_app, abort
 from walle.api.api import SecurityResource
 from walle.form.user import UserUpdateForm, RegistrationForm
 from walle.model.database import db
@@ -19,6 +19,9 @@ from werkzeug.utils import secure_filename
 from flask_login import current_user
 
 class UserAPI(SecurityResource):
+
+    actions = ['avater', 'block', 'active']
+
     def get(self, user_id=None, method=None):
         """
         fetch user list or one user
@@ -63,7 +66,7 @@ class UserAPI(SecurityResource):
             return self.render_json(code=-1)
         return self.render_json(data=user_info)
 
-    def post(self, method=None):
+    def post(self):
         """
         create user
         /user/
@@ -71,10 +74,6 @@ class UserAPI(SecurityResource):
         :return:
         """
         super(UserAPI, self).post()
-
-        # 更新头像
-        if method == 'avater':
-            return self.avater()
 
         form = RegistrationForm(request.form, csrf_enabled=False)
         if form.validate_on_submit():
@@ -88,7 +87,7 @@ class UserAPI(SecurityResource):
             return self.render_json(data=user.item(user_id=user.id))
         return self.render_json(code=-1, message=form.errors)
 
-    def put(self, user_id):
+    def put(self, user_id, action=None):
         """
         edit user
         /user/<int:user_id>
@@ -96,6 +95,13 @@ class UserAPI(SecurityResource):
         :return:
         """
         super(UserAPI, self).put()
+
+        if action:
+            if action in self.actions:
+                self_action = getattr(self, action.lower(), None)
+                return self_action(user_id=user_id)
+            else:
+                abort(404)
 
         form = UserUpdateForm(request.form, csrf_enabled=False)
         if form.validate_on_submit():
@@ -144,7 +150,7 @@ class UserAPI(SecurityResource):
             ret.append(value)
         return ret
 
-    def avater(self):
+    def avater(self, user_id):
         # TODO uid
         # fname = current_user.id + '.jpg'
 
@@ -158,3 +164,13 @@ class UserAPI(SecurityResource):
             'avarter': str(request.args),
             'u': dir(current_user),
         })
+
+    def block(self, user_id):
+        user = UserModel(id=user_id)
+        user.block_active(UserModel.status_blocked)
+        return self.render_json(data=user.item())
+
+    def active(self, user_id):
+        user = UserModel(id=user_id)
+        user.block_active(UserModel.status_active)
+        return self.render_json(data=user.item())

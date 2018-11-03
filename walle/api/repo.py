@@ -25,7 +25,6 @@ class RepoAPI(SecurityResource):
         super(RepoAPI, self).get()
         project_id = request.args.get('project_id', '')
 
-
         if action in self.actions:
             self_action = getattr(self, action.lower(), None)
             return self_action(project_id=project_id)

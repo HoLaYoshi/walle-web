@@ -21,6 +21,8 @@ from flask import current_app
 class UserModel(UserMixin, SurrogatePK, Model):
     # 表的名字:
     __tablename__ = 'users'
+    status_active  = 1
+    status_blocked = 2
 
     current_time = datetime.now()
     password_hash = 'sadfsfkk'
@@ -58,6 +60,12 @@ class UserModel(UserMixin, SurrogatePK, Model):
         if password:
             user.password = generate_password_hash(password)
 
+        db.session.commit()
+        return user.to_json()
+
+    def block_active(self, status):
+        user = self.query.filter_by(id=self.id).first()
+        user.status = status
         db.session.commit()
         return user.to_json()
 
@@ -183,6 +191,7 @@ class UserModel(UserMixin, SurrogatePK, Model):
             # TODO 当前登录用户的空间
             # 'role_id': self.role_id,
             'status': self.status_mapping[self.status],
+            # 'status': self.status,
             # 'role_name': self.role_id,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
