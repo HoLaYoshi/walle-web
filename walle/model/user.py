@@ -386,6 +386,7 @@ class GroupModel(SurrogatePK, Model):
     group_id = db.Column(Integer, db.ForeignKey('tags.id'))
     project_id = db.Column(Integer, db.ForeignKey('projects.id'))
     role = db.Column(String(30))
+    status = db.Column(Integer)
     created_at = db.Column(DateTime, default=current_time)
     updated_at = db.Column(DateTime, default=current_time, onupdate=current_time)
     group_name = None
@@ -659,7 +660,7 @@ class SpaceModel(SurrogatePK, Model):
         :return:
         """
         space_id = space_id if space_id else self.id
-        SpaceModel.query.filter_by(id=space_id).update({'status': self.status_close})
+        SpaceModel.query.filter_by(id=space_id).update({'status': self.status_remove})
         return db.session.commit()
 
     def to_json(self, uid2name=None):
