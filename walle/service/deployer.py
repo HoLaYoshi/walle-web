@@ -320,8 +320,12 @@ class Deployer:
             command = 'git pull'
             # result = self.local.run(command, wenv=self.config())
 
+            current_app.logger.info(self.dir_codebase_project)
+
             command = 'git branch -r'
             result = self.local.run(command, wenv=self.config())
+
+            # TODO 三种可能: false, error, success
 
             branches = result.stdout.strip().split('\n')
             # 去除 origin/HEAD -> 当前指向

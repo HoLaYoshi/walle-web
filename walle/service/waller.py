@@ -47,6 +47,8 @@ class Waller(Connection):
                     'host': self.host,
                     'cmd': command,
                     'status': result.exited,
+                    'stage': wenv['stage'],
+                    'sequence': wenv['sequence'],
                     'success': result.stdout.strip(),
                     'error': result.stderr.strip(),
                 }
@@ -80,6 +82,8 @@ class Waller(Connection):
                     'host': self.host,
                     'cmd': command,
                     'status': 1,
+                    'stage': wenv['stage'],
+                    'sequence': wenv['sequence'],
                     'success': '',
                     'error': e.message,
                 }
@@ -118,9 +122,38 @@ class Waller(Connection):
             message = 'task_id=%d, host:%s command:%s status:0, success:, error:' % (
             wenv['task_id'], self.host, command)
             current_app.logger.info(message)
-            wenv['websocket'].send_updates(message)
+
+            # TODO
+            if wenv.has_key('websocket') and wenv['websocket']:
+
+                ws_dict = {
+                    'host': self.host,
+                    'cmd': command,
+                    'status': 1,
+                    'stage': wenv['stage'],
+                    'sequence': wenv['sequence'],
+                    'success': '',
+                    'error': result.stderr.strip(),
+                }
+                wenv['websocket'].send_updates(ws_dict)
 
             return result
         except Exception, e:
             # TODO 收尾下
             current_app.logger.info('put: %s, %s', e, dir(e))
+
+
+            # TODO
+            if wenv.has_key('websocket') and wenv['websocket']:
+
+                # TODO command
+                ws_dict = {
+                    'host': self.host,
+                    'cmd': 'command',
+                    'status': 1,
+                    'stage': wenv['stage'],
+                    'sequence': wenv['sequence'],
+                    'success': '',
+                    'error': e.message,
+                }
+                wenv['websocket'].send_updates(ws_dict)
