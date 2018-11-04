@@ -36,8 +36,20 @@ class TestApiUser:
         'username': u'Tester',
     }
 
-    user_data_remove = {
+    user_data_3 = {
         'email': u'test03@walle-web.io',
+        'password': u'Walle99999',
+        'username': u'waller03',
+    }
+
+    user_data_4 = {
+        'email': u'test04@walle-web.io',
+        'password': u'Walle99999',
+        'username': u'waller04',
+    }
+
+    user_data_remove = {
+        'email': u'test_remove@walle-web.io',
         'password': u'Walle987&^*',
         'username': u'test_remove',
     }
@@ -49,7 +61,7 @@ class TestApiUser:
         resp = client.post('%s/' % (self.uri_prefix), data=self.user_data_error)
         response_error(resp)
 
-        # 2.create another role
+        # 2.create another user
         resp = client.post('%s/' % (self.uri_prefix), data=self.user_data)
 
         response_success(resp)
@@ -58,7 +70,7 @@ class TestApiUser:
         compare_req_resp(self.user_data, resp)
         self.user_data['id'] = resp_json(resp)['data']['id']
 
-        # 3.create another role
+        # 3.create another user
         resp = client.post('%s/' % (self.uri_prefix), data=self.user_data_2)
 
         response_success(resp)
@@ -66,6 +78,14 @@ class TestApiUser:
 
         compare_req_resp(self.user_data_2, resp)
         self.user_data_2['id'] = resp_json(resp)['data']['id']
+
+        # 4.create another user
+        resp = client.post('%s/' % (self.uri_prefix), data=self.user_data_3)
+        del self.user_data_3['password']
+
+        # 5.create another user
+        resp = client.post('%s/' % (self.uri_prefix), data=self.user_data_4)
+        del self.user_data_4['password']
 
     def test_one(self, user, testapp, client, db):
         """item successful."""
@@ -84,13 +104,13 @@ class TestApiUser:
             'size': 1,
         }
         response = {
-            'count': 4,
+            'count': 6,
         }
         resp = client.get('%s/?%s' % (self.uri_prefix, urllib.urlencode(query)))
         response_success(resp)
         resp_dict = resp_json(resp)
 
-        compare_in(self.user_data_2, resp_dict['data']['list'].pop())
+        compare_in(self.user_data_4, resp_dict['data']['list'].pop())
         compare_req_resp(response, resp)
 
     def test_get_list_query(self, user, testapp, client):

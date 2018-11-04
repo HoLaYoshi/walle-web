@@ -401,6 +401,7 @@ class ProjectModel(SurrogatePK, Model):
     user_id = db.Column(Integer)
     name = db.Column(String(100))
     environment_id = db.Column(Integer)
+    space_id = db.Column(Integer)
     status = db.Column(Integer)
     master = db.Column(String(100))
     version = db.Column(String(40))
@@ -499,6 +500,7 @@ class ProjectModel(SurrogatePK, Model):
             'user_id': self.user_id,
             'name': self.name,
             'environment_id': self.environment_id,
+            'space_id': self.space_id,
             'status': self.status,
             'master': UserModel.fetch_by_uid(self.master.split(',')) if self.master else '',
             'version': self.version,

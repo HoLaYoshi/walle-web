@@ -11,7 +11,7 @@
 from flask import request, current_app
 from walle.api.api import SecurityResource
 from walle.form.space import SpaceForm
-from walle.model.user import SpaceModel, GroupModel
+from walle.model.user import SpaceModel, MemberModel
 import json
 
 class SpaceAPI(SecurityResource):
@@ -77,7 +77,7 @@ class SpaceAPI(SecurityResource):
 
             current_app.logger.info(request.json)
             # create group
-            GroupModel(group_id=id).update_group(members=json.loads(request.form['members']))
+            MemberModel(group_id=id).update_group(members=json.loads(request.form['members']))
             return self.render_json(data=space_new.item())
         else:
             return self.render_json(code=-1, message=form.errors)
@@ -94,11 +94,13 @@ class SpaceAPI(SecurityResource):
         form = SpaceForm(request.form, csrf_enabled=False)
         form.set_id(space_id)
         if form.validate_on_submit():
-            server = SpaceModel().get_by_id(space_id)
+            space = SpaceModel().get_by_id(space_id)
             data = form.form2dict()
             # a new type to update a model
-            ret = server.update(data)
-            return self.render_json(data=server.item())
+            ret = space.update(data)
+            # create group
+            MemberModel(group_id=space_id).update_group(members=json.loads(request.form['members']))
+            return self.render_json(data=space.item())
         else:
             return self.render_json(code=-1, message=form.errors)
 

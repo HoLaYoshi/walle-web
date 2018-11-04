@@ -10,7 +10,7 @@
 
 from flask import request
 from walle.form.group import GroupForm
-from walle.model.user import GroupModel, UserModel
+from walle.model.user import MemberModel, UserModel
 from walle.model.tag import TagModel
 from walle.api.api import SecurityResource
 from flask import current_app
@@ -45,7 +45,7 @@ class GroupAPI(SecurityResource):
         group_model, count = TagModel().query_paginate(page=page, limit=size, filter_name_dict=filter)
         groups = []
         for group_info in group_model:
-            group_sub = GroupModel.query \
+            group_sub = MemberModel.query \
                 .filter_by(group_id=group_info.id) \
                 .count()
 
@@ -65,7 +65,7 @@ class GroupAPI(SecurityResource):
         :return:
         """
         ## sqlalchemy版本
-        group_model = GroupModel()
+        group_model = MemberModel()
         group = group_model.item(group_id=group_id)
         if group:
             return self.render_json(data=group)
@@ -102,7 +102,7 @@ class GroupAPI(SecurityResource):
             # user_ids = [int(uid) for uid in form.user_ids.data.split(',')]
 
             group_id = 0
-            # group_new = GroupModel()
+            # group_new = MemberModel()
             # group_id = group_new.add(group_name=form.group_name.data, user_ids=user_ids)
             if not group_id:
                 return self.render_json(code=-1)
@@ -129,7 +129,7 @@ class GroupAPI(SecurityResource):
 
             current_app.logger.info(json.loads(form.uid_roles))
 
-            group_model = GroupModel(group_id=group_id)
+            group_model = MemberModel(group_id=group_id)
             for uid_role in json.loads(form.uid_roles):
                 uid_role['project_id'] = 0
                 current_app.logger.info(uid_role)
@@ -150,7 +150,7 @@ class GroupAPI(SecurityResource):
         """
         super(GroupAPI, self).delete()
 
-        group_model = GroupModel()
+        group_model = MemberModel()
         tag_model = TagModel()
         tag_model.remove(group_id)
         group_model.remove(group_id)

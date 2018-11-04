@@ -12,7 +12,7 @@ from flask import request, current_app, abort
 from walle.api.api import SecurityResource
 from walle.form.user import UserUpdateForm, RegistrationForm
 from walle.model.database import db
-from walle.model.user import GroupModel
+from walle.model.user import MemberModel
 from walle.model.user import UserModel
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
@@ -122,7 +122,7 @@ class UserAPI(SecurityResource):
         super(UserAPI, self).delete()
 
         UserModel(id=user_id).remove()
-        GroupModel().remove(user_id=user_id)
+        MemberModel().remove(user_id=user_id)
         return self.render_json(message='')
 
     def table(self, filter={}):

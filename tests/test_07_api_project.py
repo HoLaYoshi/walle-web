@@ -16,6 +16,7 @@ class TestApiProject:
 
     project_data = {
         "environment_id": 1,
+        "space_id": 1,
         "excludes": u"*.log",
         "keep_version_num": 11,
         "name": u"walden-瓦尔登",
@@ -37,8 +38,8 @@ class TestApiProject:
     }
 
     project_data_members = [
-        {"user_id": 1, "role": "master"},
-        {"user_id": 2, "role": "developer"}
+        {"user_id": 1, "role": "MASTER"},
+        {"user_id": 2, "role": "DEVELOPER"}
     ]
 
     # should be equal to project_data_2.name
@@ -46,6 +47,7 @@ class TestApiProject:
 
     project_data_2 = {
         "environment_id": 2,
+        "space_id": 1,
         "excludes": u"*.log",
         "keep_version_num": 10,
         "name": u"walle-web",
@@ -68,6 +70,7 @@ class TestApiProject:
 
     project_data_2_update = {
         "environment_id": 1,
+        "space_id": 1,
         "excludes": u"*.log",
         "keep_version_num": 11,
         "name": u"walle-web to walden edit",
@@ -91,6 +94,7 @@ class TestApiProject:
     project_data_remove = {
         'name': u'this server will be deleted soon',
         "environment_id": 1,
+        "space_id": 1,
         "excludes": u"*.log",
         "keep_version_num": 11,
         "post_deploy": u"echo post_deploy",

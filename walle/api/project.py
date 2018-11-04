@@ -14,7 +14,7 @@ from flask import request, current_app
 from walle.api.api import SecurityResource
 from walle.form.project import ProjectForm
 from walle.model.deploy import ProjectModel
-from walle.model.user import GroupModel
+from walle.model.user import MemberModel
 
 
 class ProjectAPI(SecurityResource):
@@ -58,7 +58,7 @@ class ProjectAPI(SecurityResource):
         if not project_info:
             return self.render_json(code=-1)
 
-        group_info = GroupModel(group_id=1).item(project_id=project_id)
+        group_info = MemberModel(group_id=1).members(project_id=project_id)
         current_app.logger.info(group_info)
 
         return self.render_json(data=dict(project_info, **group_info))
@@ -130,10 +130,10 @@ class ProjectAPI(SecurityResource):
         # TODO login for group id
         group_id = 1
 
-        group_model = GroupModel(group_id=1)
+        group_model = MemberModel(project_id=project_id)
         ret = group_model.update_project(project_id=project_id, members=members)
 
-        item = group_model.item(project_id=project_id)
+        item = group_model.members()
 
         return self.render_json(data=item)
 

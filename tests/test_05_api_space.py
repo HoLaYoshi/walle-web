@@ -15,7 +15,7 @@ class TestApiSpace:
     space_data = {
         'name': u'大数据',
         'user_id': u'1',
-        'members': json.dumps([{"user_id": 1, "role": "master"}, {"user_id": 2, "role": "developer"}]),
+        'members': json.dumps([{"user_id": 1, "role": "MASTER"}, {"user_id": 2, "role": "DEVELOPER"}, {"user_id": 3, "role": "DEVELOPER"}]),
     }
 
     space_name_2 = u'瓦力'
@@ -23,13 +23,13 @@ class TestApiSpace:
     space_data_2 = {
         'name': u'瓦力',
         'user_id': u'2',
-        'members': json.dumps([{"user_id": 1, "role": "master"}, {"user_id": 2, "role": "developer"}]),
+        'members': json.dumps([{"user_id": 1, "role": "MASTER"}, {"user_id": 2, "role": "DEVELOPER"}, {"user_id": 4, "role": "DEVELOPER"}]),
     }
 
     space_data_remove = {
         'name': u'瓦尔登',
         'user_id': u'2',
-        'members': json.dumps([{"user_id": 1, "role": "master"}, {"user_id": 2, "role": "developer"}]),
+        'members': json.dumps([{"user_id": 1, "role": "MASTER"}, {"user_id": 2, "role": "DEVELOPER"}]),
     }
 
     def test_create(self, user, testapp, client, db):

@@ -20,6 +20,7 @@ from walle.model.deploy import ProjectModel
 class ProjectForm(Form):
     name = TextField('name', [validators.Length(min=1, max=100)])
     environment_id = TextField('environment_id', [validators.Length(min=1, max=10)])
+    space_id = TextField('space_id', [validators.Length(min=1, max=10)])
     status = TextField('status', [])
     excludes = TextField('excludes', [])
     master = TextField('master', [])
@@ -65,6 +66,7 @@ class ProjectForm(Form):
             'status': self.status.data if self.status.data else 0,
             'master': self.master.data if self.master.data else '',
             'environment_id': self.environment_id.data if self.environment_id.data else '',
+            'space_id': self.space_id.data if self.space_id.data else '',
             'excludes': self.excludes.data if self.excludes.data else '',
             'server_ids': self.server_ids.data if self.server_ids.data else '',
             'keep_version_num': self.keep_version_num.data if self.keep_version_num.data else 5,
