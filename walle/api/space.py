@@ -13,6 +13,7 @@ from walle.api.api import SecurityResource
 from walle.form.space import SpaceForm
 from walle.model.user import SpaceModel, MemberModel
 import json
+from walle.service.rbac.role import *
 
 class SpaceAPI(SecurityResource):
 
@@ -77,7 +78,9 @@ class SpaceAPI(SecurityResource):
 
             current_app.logger.info(request.json)
             # create group
-            MemberModel(group_id=id).update_group(members=json.loads(request.form['members']))
+            data['role'] = OWNER
+            members = [data]
+            MemberModel(group_id=id).update_group(members=members)
             return self.render_json(data=space_new.item())
         else:
             return self.render_json(code=-1, message=form.errors)
