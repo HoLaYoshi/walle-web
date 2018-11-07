@@ -7,13 +7,21 @@
     :author: wushuiyong@walle-web.io
 """
 
+
+GUEST = 'GUEST'
+REPORT = 'REPORT'
+DEVELOPER = 'DEVELOPER'
+MASTER = 'MASTER'
+OWNER = 'OWNER'
+SUPER = 'SUPER'
+
 ACCESS_ROLE = {
-    '10': 'GUEST',
-    '20': 'REPORT',
-    '30': 'DEVELOPER',
-    '40': 'MASTER',
-    '50': 'OWNER',
-    '60': 'SUPER',
+    '10': GUEST,
+    '20': REPORT,
+    '30': DEVELOPER,
+    '40': MASTER,
+    '50': OWNER,
+    '60': SUPER,
 }
 
 ROLE_ACCESS = {
