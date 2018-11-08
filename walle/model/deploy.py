@@ -11,8 +11,7 @@ from datetime import datetime
 
 from walle.model.database import SurrogatePK, db, Model
 from walle.model.user import UserModel
-
-# from walle.service.rbac import access as rbac
+from walle.service.rbac.role import *
 
 
 # 上线单
@@ -277,12 +276,24 @@ class EnvironmentModel(Model):
         return db.session.commit()
 
     def to_json(self):
-        return {
+        item = {
             'id': self.id,
             'status': self.status,
             'env_name': self.name,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+        }
+        item.update(self.enable())
+        return item
+
+    def enable(self):
+        return {
+            'enable_update': Permission.enable_role(DEVELOPER),
+            'enable_delete': Permission.enable_role(DEVELOPER),
+            'enable_create': False,
+            'enable_online': False,
+            'enable_audit': False,
+            'enable_block': False,
         }
 
 
