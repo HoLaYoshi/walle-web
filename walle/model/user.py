@@ -637,7 +637,7 @@ class SpaceModel(SurrogatePK, Model):
         return db.session.commit()
 
     def to_json(self, uid2name=None):
-        return {
+        item = {
             'id': self.id,
             'user_id': self.user_id,
             'user_name': uid2name[self.user_id] if uid2name and uid2name.has_key(self.user_id) else '',
@@ -647,6 +647,18 @@ class SpaceModel(SurrogatePK, Model):
             'status': self.status,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+        }
+        item.update(self.enable())
+        return item
+
+    def enable(self):
+        return {
+            'enable_update': Permission.enable_uid(self.user_id) or Permission.enable_role(OWNER),
+            'enable_delete': Permission.enable_uid(self.user_id) or Permission.enable_role(OWNER),
+            'enable_create': False,
+            'enable_online': False,
+            'enable_audit': False,
+            'enable_block': False,
         }
 
 

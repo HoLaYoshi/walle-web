@@ -64,8 +64,8 @@ class ApiResource(Resource):
         })
 
     @staticmethod
-    def list_json(list, count, table={}, code=0, message=''):
-        return ApiResource.render_json(data={'list': list, 'count': count, 'table': table},
+    def list_json(list, count, table={}, code=0, message='', enable_create=False):
+        return ApiResource.render_json(data={'list': list, 'count': count, 'table': table, 'enable_create': enable_create},
                                        code=code,
                                        message=message)
 

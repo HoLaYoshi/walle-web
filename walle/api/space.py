@@ -41,7 +41,7 @@ class SpaceAPI(SecurityResource):
 
         space_model = SpaceModel()
         space_list, count = space_model.list(page=page, size=size, kw=kw)
-        return self.list_json(list=space_list, count=count)
+        return self.list_json(list=space_list, count=count, enable_create=Permission.enable_role(OWNER))
 
     def item(self, space_id):
         """
