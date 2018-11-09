@@ -669,7 +669,7 @@ class SpaceModel(SurrogatePK, Model):
             'enable_create': False,
             'enable_online': False,
             'enable_audit': False,
-            'enable_block': False,
+            'enable_block': Permission.enable_role(MASTER),
         }
 
 
