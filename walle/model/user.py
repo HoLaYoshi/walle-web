@@ -64,14 +64,12 @@ class UserModel(UserMixin, SurrogatePK, Model):
             user.password = generate_password_hash(password)
 
         db.session.commit()
-        db.session.close()
         return user.to_json()
 
     def block_active(self, status):
         user = self.query.filter_by(id=self.id).first()
         user.status = status
         db.session.commit()
-        db.session.close()
         return user.to_json()
 
     def remove(self):
@@ -83,7 +81,7 @@ class UserModel(UserMixin, SurrogatePK, Model):
         self.query.filter_by(id=self.id).update({'status': self.status_remove})
 
         ret = db.session.commit()
-        db.session.close()
+
         return ret
 
     def verify_password(self, password):
@@ -420,7 +418,7 @@ class MemberModel(SurrogatePK, Model):
         tag = TagModel(name=space_name, label='user_group')
         db.session.add(tag)
         db.session.commit()
-        db.session.close()
+
         current_app.logger.info(members)
 
         for member in members:
@@ -428,7 +426,7 @@ class MemberModel(SurrogatePK, Model):
             db.session.add(user_group)
 
         db.session.commit()
-        db.session.close()
+
         if tag.id:
             self.group_id = tag.id
 
@@ -469,7 +467,7 @@ class MemberModel(SurrogatePK, Model):
 
 
         ret = db.session.commit()
-        db.session.close()
+
         return ret
 
     def update_project(self, project_id, members, group_name=None):
@@ -502,7 +500,7 @@ class MemberModel(SurrogatePK, Model):
             db.session.add(group)
 
         ret = db.session.commit()
-        db.session.close()
+
         return ret
 
     def members(self, group_id=None, project_id=None):
@@ -565,7 +563,7 @@ class MemberModel(SurrogatePK, Model):
             MemberModel.query.filter_by(project_id=project_id).update({'status': self.status_remove})
 
         ret = db.session.commit()
-        db.session.close()
+
         return ret
 
     def to_json(self):
@@ -640,7 +638,7 @@ class SpaceModel(SurrogatePK, Model):
         space = SpaceModel(name=data['name'], user_id=data['user_id'])
         db.session.add(space)
         db.session.commit()
-        db.session.close()
+
 
         self.id = space.id
         return self.id
@@ -662,7 +660,7 @@ class SpaceModel(SurrogatePK, Model):
         SpaceModel.query.filter_by(id=space_id).update({'status': self.status_remove})
 
         ret = db.session.commit()
-        db.session.close()
+
         return ret
 
     def to_json(self, uid2name=None):
