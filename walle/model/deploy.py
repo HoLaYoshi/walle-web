@@ -392,12 +392,24 @@ class ServerModel(SurrogatePK, Model):
 
 
     def to_json(self):
-        return {
+        item = {
             'id': self.id,
             'name': self.name,
             'host': self.host,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+        }
+        item.update(self.enable())
+        return item
+
+    def enable(self):
+        return {
+            'enable_update': Permission.enable_role(DEVELOPER),
+            'enable_delete': Permission.enable_role(DEVELOPER),
+            'enable_create': False,
+            'enable_online': False,
+            'enable_audit': Permission.enable_role(OWNER),
+            'enable_block': False,
         }
 
 
