@@ -108,6 +108,7 @@ class CRUDMixin(object):
         db.session.add(self)
         if commit:
             db.session.commit()
+            db.session.close()
         return self
 
     def delete(self, commit=True):

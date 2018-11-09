@@ -160,7 +160,7 @@ class UserModel(UserMixin, SurrogatePK, Model):
         :return:
         """
         if not uids:
-            return None
+            return []
 
         query = UserModel.query.filter(UserModel.id.in_(uids)).filter(UserModel.status.notin_([cls.status_remove]))
         data = query.order_by('id desc').all()
@@ -184,7 +184,7 @@ class UserModel(UserMixin, SurrogatePK, Model):
         return uid2name
 
     def to_json(self):
-        return {
+        item = {
             'id': int(self.id),
             'user_id': int(self.id),
             'username': self.username,
@@ -199,7 +199,18 @@ class UserModel(UserMixin, SurrogatePK, Model):
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
         }
+        item.update(self.enable())
+        return item
 
+    def enable(self):
+        return {
+            'enable_update': Permission.enable_role(DEVELOPER),
+            'enable_delete': Permission.enable_role(DEVELOPER),
+            'enable_create': False,
+            'enable_online': False,
+            'enable_audit': False,
+            'enable_block': False,
+        }
 
 class MenuModel(SurrogatePK, Model):
     __tablename__ = 'menus'

@@ -11,9 +11,11 @@
 from flask import request
 from walle.form.group import GroupForm
 from walle.model.user import MemberModel, UserModel
+from walle.model.user import SpaceModel
 from walle.model.tag import TagModel
 from walle.api.api import SecurityResource
 from flask import current_app
+from walle.service.rbac.role import *
 
 class GroupAPI(SecurityResource):
     def get(self, group_id=None):
@@ -34,22 +36,23 @@ class GroupAPI(SecurityResource):
 
         :return:
         """
-        page = int(request.args.get('page', 1))
-        page = page if page else 1
+        page = int(request.args.get('page', 0))
+        page = page - 1 if page else 0
         size = float(request.args.get('size', 10))
         kw = request.values.get('kw', '')
         filter = {'name': {'like': kw}} if kw else {}
-        # f = open('run.log', 'w')
-        # f.write(str(filter))
+        space_model = SpaceModel()
+        space_list, count = space_model.list(page=page, size=size, kw=kw)
+        return self.list_json(list=space_list, count=count, enable_create=Permission.enable_role(OWNER))
 
-        group_model, count = TagModel().query_paginate(page=page, limit=size, filter_name_dict=filter)
+        group_model, count = SpaceModel().query_paginate(page=page, limit=size, filter_name_dict=filter)
         groups = []
         for group_info in group_model:
             group_sub = MemberModel.query \
                 .filter_by(group_id=group_info.id) \
                 .count()
 
-            group_info = group_info.to_dict()
+            group_info = group_info.to_json()
             group_info['users'] = group_sub
             group_info['group_id'] = group_info['id']
             group_info['group_name'] = group_info['name']
@@ -66,7 +69,7 @@ class GroupAPI(SecurityResource):
         """
         ## sqlalchemy版本
         group_model = MemberModel()
-        group = group_model.item(group_id=group_id)
+        group = group_model.members(group_id=group_id)
         if group:
             return self.render_json(data=group)
         return self.render_json(code=-1)

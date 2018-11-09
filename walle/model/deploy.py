@@ -109,6 +109,7 @@ class TaskModel(SurrogatePK, Model):
 
         db.session.add(project)
         db.session.commit()
+        db.session.close()
 
         if project.id:
             self.id = project.id
@@ -253,6 +254,7 @@ class EnvironmentModel(Model):
 
         db.session.add(env)
         db.session.commit()
+        db.session.close()
         if env.id:
             self.id = env.id
 
@@ -483,6 +485,7 @@ class ProjectModel(SurrogatePK, Model):
 
         db.session.add(project)
         db.session.commit()
+        db.session.close()
         self.id = project.id
         return self.id
 
