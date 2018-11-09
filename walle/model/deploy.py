@@ -109,7 +109,7 @@ class TaskModel(SurrogatePK, Model):
 
         db.session.add(project)
         db.session.commit()
-        db.session.close()
+        
 
         if project.id:
             self.id = project.id
@@ -132,7 +132,7 @@ class TaskModel(SurrogatePK, Model):
         id = id if id else self.id
         self.query.filter_by(id=id).update({'status': self.status_remove})
         ret = db.session.commit()
-        db.session.close()
+        
         return ret
 
     def to_json(self):
@@ -197,7 +197,7 @@ class TaskRecordModel(Model):
                                  success=success, error=error)
         db.session.add(record)
         ret = db.session.commit()
-        db.session.close()
+        
         return ret
 
     def fetch(self, task_id):
@@ -270,7 +270,7 @@ class EnvironmentModel(Model):
 
         db.session.add(env)
         db.session.commit()
-        db.session.close()
+        
         if env.id:
             self.id = env.id
 
@@ -282,7 +282,7 @@ class EnvironmentModel(Model):
         role.name = env_name
         role.status = status
         ret = db.session.commit()
-        db.session.close()
+        
         return ret
 
     def remove(self, env_id=None):
@@ -293,7 +293,7 @@ class EnvironmentModel(Model):
         """
         self.query.filter_by(id=self.id).update({'status': self.status_remove})
         ret = db.session.commit()
-        db.session.close()
+        
         return ret
 
     def to_json(self):
@@ -367,7 +367,7 @@ class ServerModel(SurrogatePK, Model):
 
         db.session.add(server)
         db.session.commit()
-        db.session.close()
+        
         if server.id:
             self.id = server.id
 
@@ -385,7 +385,7 @@ class ServerModel(SurrogatePK, Model):
         role.host = host
 
         ret = db.session.commit()
-        db.session.close()
+        
         return ret
 
     def remove(self, id=None):
@@ -398,7 +398,7 @@ class ServerModel(SurrogatePK, Model):
         self.query.filter_by(id=id).update({'status': self.status_remove})
 
         ret = db.session.commit()
-        db.session.close()
+        
         return ret
 
     @classmethod
@@ -522,7 +522,7 @@ class ProjectModel(SurrogatePK, Model):
 
         db.session.add(project)
         db.session.commit()
-        db.session.close()
+        
         self.id = project.id
         return self.id
 
@@ -543,7 +543,7 @@ class ProjectModel(SurrogatePK, Model):
         ProjectModel.query.filter_by(id=role_id).update({'status': self.status_remove})
 
         ret = db.session.commit()
-        db.session.close()
+        
         return ret
 
     def to_json(self):
@@ -623,7 +623,7 @@ class TagModel(SurrogatePK, Model):
         TagModel.query.filter_by(id=tag_id).update({'status': self.status_remove})
 
         ret = db.session.commit()
-        db.session.close()
+        
         return ret
 
     def to_json(self):
