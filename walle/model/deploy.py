@@ -518,10 +518,8 @@ class ProjectModel(SurrogatePK, Model):
         ProjectModel.query.filter_by(id=role_id).update({'status': self.status_remove})
         return db.session.commit()
 
-
-
     def to_json(self):
-        return {
+        item = {
             'id': self.id,
             'user_id': self.user_id,
             'name': self.name,
@@ -552,6 +550,18 @@ class ProjectModel(SurrogatePK, Model):
             'enable_audit': self.enable_audit,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+        }
+        item.update(self.enable())
+        return item
+
+    def enable(self):
+        return {
+            'enable_update': Permission.enable_uid(self.user_id) or Permission.enable_role(OWNER),
+            'enable_delete': Permission.enable_uid(self.user_id) or Permission.enable_role(OWNER),
+            'enable_create': False,
+            'enable_online': False,
+            'enable_audit': False,
+            'enable_block': False,
         }
 
 class TagModel(SurrogatePK, Model):
