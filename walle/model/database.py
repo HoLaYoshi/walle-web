@@ -114,7 +114,10 @@ class CRUDMixin(object):
     def delete(self, commit=True):
         """Remove the record from the database."""
         db.session.delete(self)
-        return commit and db.session.commit()
+        if commit:
+            db.session.commit()
+            db.session.close()
+        return self
 
     def to_dict(self, fields_list=None):
         """

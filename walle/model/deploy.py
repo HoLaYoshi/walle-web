@@ -131,7 +131,9 @@ class TaskModel(SurrogatePK, Model):
         """
         id = id if id else self.id
         self.query.filter_by(id=id).update({'status': self.status_remove})
-        return db.session.commit()
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     def to_json(self):
         item = {
@@ -194,7 +196,9 @@ class TaskRecordModel(Model):
                                  task_id=task_id, status=status, host=host, user=user, command=command,
                                  success=success, error=error)
         db.session.add(record)
-        return db.session.commit()
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     def fetch(self, task_id):
         data = self.query.filter_by(task_id=task_id).order_by('id desc').all()
@@ -277,8 +281,9 @@ class EnvironmentModel(Model):
         role = EnvironmentModel.query.filter_by(id=self.id).first()
         role.name = env_name
         role.status = status
-
-        return db.session.commit()
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     def remove(self, env_id=None):
         """
@@ -287,7 +292,9 @@ class EnvironmentModel(Model):
         :return:
         """
         self.query.filter_by(id=self.id).update({'status': self.status_remove})
-        return db.session.commit()
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     def to_json(self):
         item = {
@@ -360,6 +367,7 @@ class ServerModel(SurrogatePK, Model):
 
         db.session.add(server)
         db.session.commit()
+        db.session.close()
         if server.id:
             self.id = server.id
 
@@ -376,7 +384,9 @@ class ServerModel(SurrogatePK, Model):
         role.name = name
         role.host = host
 
-        return db.session.commit()
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     def remove(self, id=None):
         """
@@ -386,7 +396,10 @@ class ServerModel(SurrogatePK, Model):
         """
         id = id if id else self.id
         self.query.filter_by(id=id).update({'status': self.status_remove})
-        return db.session.commit()
+
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     @classmethod
     def fetch_by_id(cls, ids=None):
@@ -528,7 +541,10 @@ class ProjectModel(SurrogatePK, Model):
         """
         role_id = role_id if role_id else self.id
         ProjectModel.query.filter_by(id=role_id).update({'status': self.status_remove})
-        return db.session.commit()
+
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     def to_json(self):
         item = {
@@ -605,7 +621,10 @@ class TagModel(SurrogatePK, Model):
         :return:
         """
         TagModel.query.filter_by(id=tag_id).update({'status': self.status_remove})
-        return db.session.commit()
+
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     def to_json(self):
         # user_ids = []

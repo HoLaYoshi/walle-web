@@ -64,12 +64,14 @@ class UserModel(UserMixin, SurrogatePK, Model):
             user.password = generate_password_hash(password)
 
         db.session.commit()
+        db.session.close()
         return user.to_json()
 
     def block_active(self, status):
         user = self.query.filter_by(id=self.id).first()
         user.status = status
         db.session.commit()
+        db.session.close()
         return user.to_json()
 
     def remove(self):
@@ -79,7 +81,10 @@ class UserModel(UserMixin, SurrogatePK, Model):
         :return:
         """
         self.query.filter_by(id=self.id).update({'status': self.status_remove})
-        return db.session.commit()
+
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     def verify_password(self, password):
         """
@@ -415,6 +420,7 @@ class MemberModel(SurrogatePK, Model):
         tag = TagModel(name=space_name, label='user_group')
         db.session.add(tag)
         db.session.commit()
+        db.session.close()
         current_app.logger.info(members)
 
         for member in members:
@@ -422,6 +428,7 @@ class MemberModel(SurrogatePK, Model):
             db.session.add(user_group)
 
         db.session.commit()
+        db.session.close()
         if tag.id:
             self.group_id = tag.id
 
@@ -460,7 +467,10 @@ class MemberModel(SurrogatePK, Model):
             m = MemberModel(**update)
             db.session.add(m)
 
-        return db.session.commit()
+
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     def update_project(self, project_id, members, group_name=None):
         space_info = walle.model.deploy.ProjectModel.query.filter_by(id=project_id).first().to_json()
@@ -491,7 +501,9 @@ class MemberModel(SurrogatePK, Model):
             group = MemberModel(**insert)
             db.session.add(group)
 
-        return db.session.commit()
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     def members(self, group_id=None, project_id=None):
         """
@@ -552,7 +564,9 @@ class MemberModel(SurrogatePK, Model):
         elif project_id:
             MemberModel.query.filter_by(project_id=project_id).update({'status': self.status_remove})
 
-        return db.session.commit()
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     def to_json(self):
         return {
@@ -626,6 +640,7 @@ class SpaceModel(SurrogatePK, Model):
         space = SpaceModel(name=data['name'], user_id=data['user_id'])
         db.session.add(space)
         db.session.commit()
+        db.session.close()
 
         self.id = space.id
         return self.id
@@ -645,7 +660,10 @@ class SpaceModel(SurrogatePK, Model):
         """
         space_id = space_id if space_id else self.id
         SpaceModel.query.filter_by(id=space_id).update({'status': self.status_remove})
-        return db.session.commit()
+
+        ret = db.session.commit()
+        db.session.close()
+        return ret
 
     def to_json(self, uid2name=None):
         item = {
