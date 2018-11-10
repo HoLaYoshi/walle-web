@@ -738,7 +738,8 @@ class SpaceModel(SurrogatePK, Model):
         # tag = TagModel(name=data['name'], label='user_group')
         # db.session.add(tag)
         # db.session.commit()
-        space = SpaceModel(name=data['name'], user_id=data['user_id'])
+        data = dict(*args)
+        space = SpaceModel(**data)
         db.session.add(space)
         db.session.commit()
 
