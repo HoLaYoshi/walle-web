@@ -64,7 +64,7 @@ class UserAPI(SecurityResource):
             return self.render_json(code=-1)
         return self.render_json(data=user_info)
 
-    def post(self):
+    def post(self, user_id=None, action=None):
         """
         create user
         /user/
@@ -72,6 +72,9 @@ class UserAPI(SecurityResource):
         :return:
         """
         super(UserAPI, self).post()
+
+        if action and action == 'avatar':
+            return self.avatar(user_id)
 
         form = RegistrationForm(request.form, csrf_enabled=False)
         if form.validate_on_submit():
