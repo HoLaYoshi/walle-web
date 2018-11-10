@@ -3,7 +3,7 @@
 import logging
 import sys, os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, current_app
 from flask_restful import Api
 from tornado.ioloop import IOLoop
 from tornado.web import Application, FallbackHandler
@@ -33,15 +33,14 @@ from walle.service.websocket import WSHandler
 
 
 # TODO 添加到这,则对单测有影响
-app = Flask(__name__.split('.')[0])
-
+# app = Flask(__name__.split('.')[0])
 
 def create_app(config_object=ProdConfig):
     """An application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
 
     :param config_object: The configuration object to use.
     """
-    # app = Flask(__name__.split('.')[0])
+    app = Flask(__name__.split('.')[0])
     app.config.from_object(config_object)
     register_extensions(app)
     register_blueprints(app)
@@ -50,7 +49,22 @@ def create_app(config_object=ProdConfig):
     register_commands(app)
     register_logging(app)
 
-    # app.logger.info('=== testing ===')
+    @app.before_request
+    def before_request():
+        # TODO
+        app.logger.info('============ @app.before_request ============')
+
+    @app.teardown_request
+    def shutdown_session(exception=None):
+        # TODO
+        from walle.model.database import db
+        db.session.remove()
+        current_app.logger.info('============ @app.teardown_request ============')
+
+    @app.route('/api/websocket')
+    def index():
+
+        return render_template('websocket.html')
 
     # 测试环境跑单测失败
     if not app.config['TESTING']:
@@ -60,6 +74,7 @@ def create_app(config_object=ProdConfig):
 
     reload(sys)
     sys.setdefaultencoding('utf-8')
+
     return app
 
 
@@ -193,7 +208,7 @@ class InfoFilter(logging.Filter):
             return 0
 
 # TODO optimize
-@app.route('/api/websocket')
-def index():
-
-    return render_template('websocket.html')
+# @app.route('/api/websocket')
+# def index():
+#
+#     return render_template('websocket.html')

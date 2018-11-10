@@ -5,7 +5,7 @@ from pprint import pformat
 from sqlalchemy import desc, or_
 from sqlalchemy.sql.sqltypes import Date, DateTime
 from werkzeug import cached_property
-
+from flask import current_app
 from walle.service.extensions import db
 from walle.service.utils import basestring
 from walle.service.utils import datetime_str_to_obj, date_str_to_obj
@@ -100,6 +100,7 @@ class CRUDMixin(object):
     def update(self, commit=True, **kwargs):
         """Update specific fields of a record."""
         for attr, value in kwargs.items():
+            current_app.logger.info(attr + value)
             setattr(self, attr, value)
         return commit and self.save() or self
 
@@ -107,16 +108,21 @@ class CRUDMixin(object):
         """Save the record."""
         db.session.add(self)
         if commit:
-            db.session.commit()
-            db.session.close()
+            try:
+                db.session.commit()
+            except Exception as e:
+                current_app.logger.info(e)
+                db.session.rollback()
         return self
 
     def delete(self, commit=True):
         """Remove the record from the database."""
         db.session.delete(self)
         if commit:
-            db.session.commit()
-            db.session.close()
+            try:
+                db.session.commit()
+            except:
+                db.session.rollback()
         return self
 
     def to_dict(self, fields_list=None):

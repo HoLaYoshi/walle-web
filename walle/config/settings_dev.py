@@ -14,7 +14,7 @@ class DevConfig(Config):
     WTF_CSRF_ENABLED = False
     DB_PATH = os.path.join(Config.PROJECT_ROOT, DB_NAME)
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(DB_PATH)
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:@localhost/walle_python'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:whoiam@localhost/walle_python'
     DEBUG_TB_ENABLED = True
     ASSETS_DEBUG = True  # Don't bundle/minify static assets
     CACHE_TYPE = 'simple'  # Can be "memcached", "redis", etc.
@@ -22,7 +22,8 @@ class DevConfig(Config):
 
     # 前端项目部署路径
     FE_PATH = '/Users/wushuiyong/workspace/meolu/walle-fe/'
-    UPLOAD_AVATER = FE_PATH + 'dist/avater/'
+    AVATAR_PATH = 'avatar/'
+    UPLOAD_AVATAR = FE_PATH + 'dist/' + AVATAR_PATH
 
     #email config
     MAIL_SERVER = 'smtp.exmail.qq.com'
@@ -47,4 +48,4 @@ class DevConfig(Config):
     LOCAL_SERVER_USER = 'wushuiyong'
     LOCAL_SERVER_PORT = 22
 
-    # SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = True

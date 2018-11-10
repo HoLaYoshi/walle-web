@@ -9,18 +9,17 @@
 """
 import os
 from flask import request, current_app, abort
+from flask_login import current_user
 from walle.api.api import SecurityResource
 from walle.form.user import UserUpdateForm, RegistrationForm
 from walle.model.database import db
 from walle.model.user import MemberModel
 from walle.model.user import UserModel
 from werkzeug.security import generate_password_hash
-from werkzeug.utils import secure_filename
-from flask_login import current_user
+
 
 class UserAPI(SecurityResource):
-
-    actions = ['avater', 'block', 'active']
+    actions = ['avatar', 'block', 'active']
 
     def get(self, user_id=None, method=None):
         """
@@ -32,7 +31,6 @@ class UserAPI(SecurityResource):
         super(UserAPI, self).get()
 
         return self.item(user_id) if user_id else self.list()
-
 
     def list(self):
         """
@@ -107,7 +105,7 @@ class UserAPI(SecurityResource):
         form = UserUpdateForm(request.form, csrf_enabled=False)
         if form.validate_on_submit():
             user = UserModel(id=user_id)
-            user.update(username=form.username.data, password=form.password.data)
+            user.update_name_pwd(username=form.username.data, password=form.password.data)
             return self.render_json(data=user.item())
 
         return self.render_json(code=-1, message=form.errors)
@@ -151,19 +149,24 @@ class UserAPI(SecurityResource):
             ret.append(value)
         return ret
 
-    def avater(self, user_id):
+    def avatar(self, user_id):
         # TODO uid
         # fname = current_user.id + '.jpg'
+        random = generate_password_hash(str(user_id))
+        fname = random[-10:] + '.jpg'
+        current_app.logger.info(fname)
 
         UPLOAD_FOLDER = 'fe/public/avater'
-        f = request.files['avater']
+        f = request.files['avatar']
         # todo rename to uid relation
-        fname = secure_filename(f.filename)
-        ret = f.save(os.path.join(current_app.config['UPLOAD_AVATER'], fname))
-
+        # fname = secure_filename(f.filename)
+        # TODO try
+        ret = f.save(os.path.join(current_app.config['UPLOAD_AVATAR'], fname))
+        user = UserModel.query.get(user_id)
+        user.avatar = fname
+        user.save()
         return self.render_json(data={
-            'avarter': str(request.args),
-            'u': dir(current_user),
+            'avatar': UserModel.avatar_url(user.avatar),
         })
 
     def block(self, user_id):

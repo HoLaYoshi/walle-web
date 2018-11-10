@@ -15,6 +15,9 @@ class Config(object):
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     CACHE_TYPE = 'simple'  # Can be "memcached", "redis", etc.
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+
+    AVATAR_PATH = 'avatar/'
 
 
     LOCAL_SERVER_HOST = '127.0.0.1'

@@ -56,12 +56,25 @@ class UserModel(UserMixin, SurrogatePK, Model):
         data = self.query.filter_by(id=self.id).filter(UserModel.status.notin_([self.status_remove])).first()
         return data.to_json() if data else []
 
-    def update(self, username, password=None):
+
+    def update(self, *args, **kwargs):
+        # todo permission_ids need to be formated and checked
+        # a new type to update a model
+
+        update_data = dict(*args)
+        return super(UserModel, self).update(**update_data)
+
+    def update_avatar(self, avatar):
+        d = {'avatar': avatar}
+        user = self.query.get(self.id).update(**d)
+        current_app.logger.info(user)
+
+    def update_name_pwd(self, username, password=None):
         # todo permission_ids need to be formated and checked
         user = self.query.filter_by(id=self.id).first()
         user.username = username
         if password:
-            user.password = generate_password_hash(password)
+            self.set_password(password)
 
         db.session.commit()
         return user.to_json()
@@ -154,6 +167,11 @@ class UserModel(UserMixin, SurrogatePK, Model):
         data = query.order_by('id desc').offset(int(size) * int(page)).limit(size).all()
         user_list = [p.to_json() for p in data]
         return user_list, count
+
+
+    @classmethod
+    def avatar_url(cls, avatar):
+        return '/' + current_app.config['AVATAR_PATH'] + avatar
 
     @classmethod
     def fetch_by_uid(cls, uids=None):
