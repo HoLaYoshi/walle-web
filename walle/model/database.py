@@ -100,7 +100,6 @@ class CRUDMixin(object):
     def update(self, commit=True, **kwargs):
         """Update specific fields of a record."""
         for attr, value in kwargs.items():
-            current_app.logger.info(attr + value)
             setattr(self, attr, value)
         return commit and self.save() or self
 
