@@ -20,6 +20,7 @@ from walle.model.user import SpaceModel
 class SpaceForm(Form):
     name = TextField('name', [validators.Length(min=1, max=100)])
     user_id = TextField('user_id', [validators.Length(min=1, max=100)])
+    status = TextField('status', [])
     id = None
 
     def set_id(self, id):
