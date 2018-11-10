@@ -94,7 +94,7 @@ def register_blueprints(app):
     api = Api(app)
     api.add_resource(BaseAPI.Base, '/', endpoint='root')
     api.add_resource(GeneralAPI.GeneralAPI, '/api/general/<string:action>', endpoint='general')
-    api.add_resource(SpaceAPI.SpaceAPI, '/api/space/', '/api/space/<int:space_id>', endpoint='space')
+    api.add_resource(SpaceAPI.SpaceAPI, '/api/space/', '/api/space/<int:space_id>', '/api/space/<int:space_id>/<string:action>', endpoint='space')
     api.add_resource(DeployAPI.DeployAPI, '/api/deploy/', '/api/deploy/<int:task_id>', endpoint='deploy')
     api.add_resource(AccessAPI.AccessAPI, '/api/access/', '/api/access/<int:access_id>', endpoint='access')
     api.add_resource(RoleAPI.RoleAPI, '/api/role/', endpoint='role')

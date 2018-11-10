@@ -9,14 +9,13 @@
 """
 
 import os
-from flask import request,abort
+from flask import request, abort, session
 from walle.api.api import ApiResource
 from walle.model.deploy import TaskRecordModel
 from walle.model.user import MenuModel
 from walle.model.user import UserModel
 from walle.service import emails
 from walle.service.deployer import Deployer
-from walle.service.websocket import WSHandler
 from werkzeug.utils import secure_filename
 
 
@@ -36,7 +35,6 @@ class GeneralAPI(ApiResource):
         else:
             abort(404)
 
-
     def post(self, action):
         """
         fetch role list or one role
@@ -50,9 +48,21 @@ class GeneralAPI(ApiResource):
         role = 10
         user = UserModel(id=1).item()
         menu = MenuModel().menu(role=role)
+        # TODO
+        space_id = 1
+        if 'space_id' in session and session['space_id']:
+            space_id = session['space_id']
+        spaces = {
+            1: {'id': 1, 'name': '大数据'},
+            2: {'id': 2, 'name': '瓦力'},
+            3: {'id': 3, 'name': '瓦尔登'}
+        }
+        space = spaces[space_id]
+        del spaces[space_id]
+
         space = {
-            'current': {'id': 1, 'name': '大数据'},
-            'available': [{'id': 2, 'name': '瓦力'}, {'id': 3, 'name': '瓦尔登'}]
+            'current': space,
+            'available': list(spaces.values())
         }
         data = {
             'user': user,
@@ -74,7 +84,6 @@ class GeneralAPI(ApiResource):
         })
 
     def mail(self):
-        ret = 'x'
         ret = emails.send_email('wushuiyong@renrenche.com', 'email from service@walle-web.io', 'xxxxxxx', 'yyyyyyy')
         return self.render_json(data={
             'avarter': 'emails.send_email',

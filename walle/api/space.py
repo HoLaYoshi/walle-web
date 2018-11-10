@@ -8,7 +8,7 @@
     :author: wushuiyong@walle-web.io
 """
 
-from flask import request, current_app
+from flask import request, current_app, session
 from walle.api.api import SecurityResource
 from walle.form.space import SpaceForm
 from walle.model.user import SpaceModel, MemberModel
@@ -85,7 +85,7 @@ class SpaceAPI(SecurityResource):
         else:
             return self.render_json(code=-1, message=form.errors)
 
-    def put(self, space_id):
+    def put(self, space_id, action=None):
         """
         update environment
         /environment/<int:id>
@@ -93,6 +93,9 @@ class SpaceAPI(SecurityResource):
         :return:
         """
         super(SpaceAPI, self).put()
+
+        if action and action == 'switch':
+            return self.switch(space_id)
 
         form = SpaceForm(request.form, csrf_enabled=False)
         form.set_id(space_id)
@@ -121,3 +124,7 @@ class SpaceAPI(SecurityResource):
         space_model.remove(space_id)
 
         return self.render_json(message='')
+
+    def switch(self, space_id):
+        session['space_id'] = space_id
+        return self.render_json()
