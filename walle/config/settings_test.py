@@ -22,7 +22,8 @@ class TestConfig(Config):
 
     # 前端项目部署路径
     FE_PATH = '/Users/wushuiyong/workspace/meolu/walle-fe/'
-    UPLOAD_AVATER = FE_PATH + 'dist/avater/'
+    AVATAR_PATH = 'avatar/'
+    UPLOAD_AVATAR = FE_PATH + 'dist/' + AVATAR_PATH
 
     #email config
     MAIL_SERVER = 'smtp.exmail.qq.com'
