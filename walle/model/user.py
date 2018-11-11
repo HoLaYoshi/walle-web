@@ -589,7 +589,11 @@ class MemberModel(SurrogatePK, Model):
 
         # 修改用户组成员
         # clean up
-        MemberModel.query.filter_by(project_id=project_id).delete(synchronize_session=False)
+        filters = {
+            MemberModel.source_id == project_id,
+            MemberModel.source_type == self.source_type_project,
+        }
+        MemberModel.query.filter(*filters).delete()
 
         # insert all
         for member in members:

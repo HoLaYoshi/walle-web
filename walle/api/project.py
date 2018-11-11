@@ -125,6 +125,7 @@ class ProjectAPI(SecurityResource):
         """
 
         :param project_id:
+        :param members:
         :return:
         """
         # TODO login for group id
