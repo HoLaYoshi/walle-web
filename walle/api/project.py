@@ -58,7 +58,7 @@ class ProjectAPI(SecurityResource):
         if not project_info:
             return self.render_json(code=-1)
 
-        group_info = MemberModel(group_id=1).members(project_id=project_id)
+        group_info = MemberModel().members(project_id=project_id)
         current_app.logger.info(group_info)
 
         return self.render_json(data=dict(project_info, **group_info))
