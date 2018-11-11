@@ -86,7 +86,6 @@ class UserAPI(SecurityResource):
                              )
             db.session.add(user)
             db.session.commit()
-            db.session.close()
             return self.render_json(data=user.item(user_id=user.id))
         return self.render_json(code=-1, message=form.errors)
 
