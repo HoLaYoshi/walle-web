@@ -50,7 +50,7 @@ class UserAPI(SecurityResource):
             'username': ['线上', '线下'],
             'status': ['正常', '禁用']
         }
-        return self.list_json(list=user_list, count=count, table=self.table(filter), enable_create=Permission.enable_role(OWNER))
+        return self.list_json(list=user_list, count=count, table=self.table(filter), enable_create=Permission.enable_role(MASTER))
 
     def item(self, user_id):
         """
