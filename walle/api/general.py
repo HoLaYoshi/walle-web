@@ -10,6 +10,7 @@
 
 import os
 from flask import request, abort, session
+from flask_login import current_user
 from walle.api.api import ApiResource
 from walle.model.deploy import TaskRecordModel
 from walle.model.user import MenuModel

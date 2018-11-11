@@ -6,10 +6,14 @@
     :created time: 2017-06-11 15:40:38
     :author: wushuiyong@walle-web.io
 """
-from flask_login import current_user
 import logging
+from functools import wraps
+
+from flask import current_app
+from flask_login import current_user
 
 class Access:
+
     def __init__(self):
         pass
 
