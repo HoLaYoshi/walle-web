@@ -7,14 +7,13 @@
     :author: wushuiyong@walle-web.io
 """
 
-from flask import jsonify, abort
+from flask import jsonify, abort, current_app
 from flask_login import login_required
 from flask_restful import Resource
 from walle.service.rbac.access import Access as AccessRbac
-from walle.model.user import load_user
-
+from walle.service.extensions import login_manager
 from functools import wraps
-
+from walle.service.code import Code
 from flask import current_app, session
 from flask_login import current_user
 
@@ -22,6 +21,7 @@ class ApiResource(Resource):
     module = None
     controller = None
     actions = None
+    action = None
 
     # TODO 权限验证
     # def __init__(self):
@@ -57,6 +57,12 @@ class ApiResource(Resource):
 
     @staticmethod
     def json(code=0, message=None, data=[]):
+        if not Code.code_msg.has_key(code):
+            current_app.logger.error('unkown code %s' % (code))
+
+        if Code.code_msg.has_key(code) and not message:
+            message = Code.code_msg[code]
+
         return jsonify({
             'code': code,
             'message': message,
@@ -75,13 +81,13 @@ class SecurityResource(ApiResource):
     controller = None
     action = None
 
-    #@login_required
+    @login_required
     def get(self, *args, **kwargs):
         self.action = 'get'
 
         return self.validator()
 
-    #@login_required
+    @login_required
     def delete(self, *args, **kwargs):
         self.action = 'delete'
         is_allow = AccessRbac.is_allow(action=self.action, controller=self.controller)
@@ -91,7 +97,7 @@ class SecurityResource(ApiResource):
             pass
         pass
 
-    #@login_required
+    @login_required
     def put(self, *args, **kwargs):
         self.action = 'put'
         is_allow = AccessRbac.is_allow(action=self.action, controller=self.controller)
@@ -101,7 +107,7 @@ class SecurityResource(ApiResource):
             pass
         pass
 
-    #@login_required
+    @login_required
     def post(self, *args, **kwargs):
         """
         # @login_required

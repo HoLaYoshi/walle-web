@@ -7,7 +7,7 @@
     :created time: 2017-03-25 11:15:01
     :author: wushuiyong@walle-web.io
 """
-
+from flask_login import login_required, current_user
 from flask import request
 from walle.form.group import GroupForm
 from walle.model.user import MemberModel, UserModel
@@ -18,6 +18,7 @@ from flask import current_app
 from walle.service.rbac.role import *
 
 class GroupAPI(SecurityResource):
+
     def get(self, group_id=None):
         """
         用户组列表

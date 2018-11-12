@@ -3,7 +3,7 @@
 import logging
 import sys, os
 
-from flask import Flask, render_template, current_app
+from flask import Flask, render_template, current_app, jsonify
 from flask_restful import Api
 from tornado.ioloop import IOLoop
 from tornado.web import Application, FallbackHandler
@@ -30,6 +30,7 @@ from walle.model.user import UserModel
 from walle.service.extensions import bcrypt, csrf_protect, db, migrate
 from walle.service.extensions import login_manager, mail
 from walle.service.websocket import WSHandler
+from walle.service.code import Code
 
 
 # TODO 添加到这,则对单测有影响
@@ -83,9 +84,23 @@ def register_extensions(app):
     bcrypt.init_app(app)
     db.init_app(app)
     csrf_protect.init_app(app)
+    login_manager.session_protection = 'strong'
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        current_app.logger.info(user_id)
+        return UserModel.query.get(user_id)
+
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        # TODO log
+        return BaseAPI.ApiResource.json(code=Code.unlogin)
     login_manager.init_app(app)
+
     migrate.init_app(app, db)
     mail.init_app(app)
+
+
     return None
 
 
@@ -207,8 +222,3 @@ class InfoFilter(logging.Filter):
         else:
             return 0
 
-# TODO optimize
-# @app.route('/api/websocket')
-# def index():
-#
-#     return render_template('websocket.html')

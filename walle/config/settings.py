@@ -19,6 +19,8 @@ class Config(object):
 
     AVATAR_PATH = 'avatar/'
 
+    LOGIN_DISABLED = False
+
 
     LOCAL_SERVER_HOST = '127.0.0.1'
     LOCAL_SERVER_USER = 'wushuiyong'

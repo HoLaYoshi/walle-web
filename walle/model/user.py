@@ -797,13 +797,3 @@ class SpaceModel(SurrogatePK, Model):
             'enable_block': Permission.enable_role(MASTER),
         }
 
-
-@login_manager.user_loader
-def load_user(user_id):
-    # user = UserModel.query.get(user_id)
-    # role = RoleModel().item(user.role_id)
-    # access = UserModel().fetch_access_list_by_role_id(user.role_id)
-    # logging.error(RoleModel.query.get(user.role_id).access_ids)
-    # logging.error(role['access_ids'].split(','))
-    # logging.error(UserModel.query.get(user_id))
-    return UserModel.query.get(user_id)
