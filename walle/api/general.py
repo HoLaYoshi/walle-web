@@ -9,13 +9,14 @@
 """
 
 import os
-from flask import request, abort, session
+from flask import request, abort, session, current_app
 from flask_login import current_user
 from walle.api.api import ApiResource
 from walle.model.deploy import TaskRecordModel
 from walle.model.user import MenuModel
 from walle.model.user import UserModel
 from walle.service import emails
+from walle.service.rbac.role import *
 from walle.service.deployer import Deployer
 from werkzeug.utils import secure_filename
 
@@ -47,24 +48,24 @@ class GeneralAPI(ApiResource):
 
     def menu(self):
         role = 10
-        user = UserModel(id=1).item()
+        current_app.logger.info(current_user.id)
+        user = UserModel(id=current_user.id).item()
         menu = MenuModel().menu(role=role)
         # TODO
-        space_id = 1
-        if 'space_id' in session and session['space_id']:
-            space_id = session['space_id']
-        spaces = {
-            1: {'id': 1, 'name': '大数据'},
-            2: {'id': 2, 'name': '瓦力'},
-            3: {'id': 3, 'name': '瓦尔登'}
-        }
-        space = spaces[space_id]
-        del spaces[space_id]
+        space = []
+        # 超管不需要展示空间列表
+        if current_user.role <> SUPER:
+            spaces = current_user.has_spaces()
 
-        space = {
-            'current': space,
-            'available': list(spaces.values())
-        }
+            if 'space_id' not in session or not session['space_id']:
+                session['space_id'] = spaces.keys()[0]
+
+            space = spaces[session['space_id']]
+
+            space = {
+                'current': space,
+                'available': current_user.has_spaces(),
+            }
         data = {
             'user': user,
             'menu': menu,

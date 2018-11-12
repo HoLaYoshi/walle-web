@@ -17,6 +17,7 @@ from sqlalchemy.orm import aliased
 from walle.service.rbac.access import Access as AccessRbac
 from flask import current_app
 from walle.service.rbac.role import *
+from flask_login import current_user as g
 
 import walle.model
 
@@ -35,6 +36,7 @@ class UserModel(UserMixin, SurrogatePK, Model):
     email = db.Column(String(50), unique=True, nullable=False)
     password = db.Column(String(50), nullable=False)
     avatar = db.Column(String(100))
+    role = db.Column(String(10))
     status = db.Column(Integer, default=1)
     # role_info = relationship("walle.model.user.RoleModel", back_populates="users")
     created_at = db.Column(DateTime, default=current_time)
@@ -253,6 +255,9 @@ class UserModel(UserMixin, SurrogatePK, Model):
         user_list = [p.to_json() for p in data]
         return user_list, count
 
+    def has_spaces(self):
+        spaces, count = SpaceModel().list()
+        return {space['id']: {'id': space['id'], 'name': space['name']} for space in spaces}
 
     @classmethod
     def avatar_url(cls, avatar):
@@ -712,6 +717,9 @@ class SpaceModel(SurrogatePK, Model):
         query = self.query.filter(SpaceModel.status.notin_([self.status_remove]))
         if kw:
             query = query.filter(SpaceModel.name.like('%' + kw + '%'))
+
+        # TODO 如果是超管,可以全量,否则需要过滤自己有权限的空间列表
+        query = query.filter_by(user_id=g.id)
         count = query.count()
         data = query.order_by('id desc').offset(int(size) * int(page)).limit(size).all()
 
