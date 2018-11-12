@@ -67,7 +67,7 @@ class GeneralAPI(ApiResource):
 
             space = {
                 'current': space,
-                'available': current_user.has_spaces(),
+                'available': current_user.has_spaces().values(),
             }
         data = {
             'user': user,
