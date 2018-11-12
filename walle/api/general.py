@@ -56,8 +56,11 @@ class GeneralAPI(ApiResource):
         # 超管不需要展示空间列表
         if current_user.role <> SUPER:
             spaces = current_user.has_spaces()
+            current_app.logger.info(spaces)
 
-            if 'space_id' not in session or not session['space_id']:
+            if 'space_id' not in session \
+                    or not session['space_id'] \
+                    or session['space_id'] not in spaces.keys():
                 session['space_id'] = spaces.keys()[0]
 
             space = spaces[session['space_id']]
