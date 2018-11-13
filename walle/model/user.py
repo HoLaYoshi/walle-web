@@ -15,7 +15,7 @@ from walle.model.database import SurrogatePK, db, Model
 from walle.model.tag import TagModel
 from sqlalchemy.orm import aliased
 from walle.service.rbac.access import Access as AccessRbac
-from flask import current_app
+from flask import current_app, session
 from walle.service.rbac.role import *
 from flask_login import current_user as g
 
@@ -368,13 +368,13 @@ class MenuModel(SurrogatePK, Model):
                     'sub_menu': [],
                 }
                 if item.url:
-                    module['url'] = item.url
+                    module['url'] = RoleModel.menu_url(item.url)
                 data[item.id] = module
             elif item.type == self.type_controller:
                 data[item.pid]['sub_menu'].append({
                     'title': item.name_cn,
                     'icon': item.icon,
-                    'url': item.url,
+                    'url': RoleModel.menu_url(item.url),
                 })
 
         return data.values()
@@ -476,6 +476,17 @@ class RoleModel(object):
     def item(cls, role_id):
         return None
 
+    @classmethod
+    def menu_url(cls, url):
+        if url == '/':
+            return url
+
+        prefix = session['space_name']
+        if g.role == SUPER:
+            prefix = 'admin'
+
+        return '/' + prefix + url
+
 
 # 项目配置表
 class MemberModel(SurrogatePK, Model):
@@ -528,7 +539,6 @@ class MemberModel(SurrogatePK, Model):
         db.session.add(tag)
         db.session.commit()
 
-        current_app.logger.info(members)
 
         for member in members:
             user_group = MemberModel(group_id=tag.id, user_id=member['user_id'], project_id=member['project_id'])
@@ -542,7 +552,6 @@ class MemberModel(SurrogatePK, Model):
         return tag.id
 
     def update_group(self, members, group_name=None):
-        current_app.logger.info(members)
         # 修复空间名称
         if group_name:
             SpaceModel(id=self.group_id).update({'name': group_name})
@@ -561,7 +570,6 @@ class MemberModel(SurrogatePK, Model):
         MemberModel.query.filter(*filters).delete()
 
         # insert all
-        current_app.logger.info(members)
         for member in members:
             update = {
                 'user_id': member['user_id'],
@@ -570,7 +578,6 @@ class MemberModel(SurrogatePK, Model):
                 'access_level': member['role'].upper(),
                 'status': self.status_available,
             }
-            current_app.logger.info(update)
             m = MemberModel(**update)
             db.session.add(m)
 
@@ -584,7 +591,6 @@ class MemberModel(SurrogatePK, Model):
         group_model = self.members(group_id=space_info['space_id'])
         user_update = []
 
-        current_app.logger.info(project_id)
         for member in members:
             user_update.append(member['user_id'])
 
@@ -632,7 +638,6 @@ class MemberModel(SurrogatePK, Model):
             'source_type': {'=': source_type},
         }
 
-        current_app.logger.info(filters)
         # TODO
         page = 1
         size = 10

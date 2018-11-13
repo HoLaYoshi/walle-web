@@ -8,7 +8,7 @@
 """
 
 from flask import jsonify, abort, current_app
-from flask_login import login_required
+from flask_login import login_required, current_user
 from flask_restful import Resource
 from walle.service.rbac.access import Access as AccessRbac
 from walle.service.extensions import login_manager
@@ -16,6 +16,7 @@ from functools import wraps
 from walle.service.code import Code
 from flask import current_app, session
 from flask_login import current_user
+from walle.model.user import UserModel, SpaceModel, MemberModel
 
 class ApiResource(Resource):
     module = None
@@ -24,28 +25,27 @@ class ApiResource(Resource):
     action = None
 
     # TODO 权限验证
-    # def __init__(self):
-    #
-    #     from walle.model.user import UserModel
-    #     from flask_login import login_user
-    #     from flask_login import current_user
-    #     from flask import current_app
-    #     user = UserModel.query.filter_by(email='wushuiyong@renrenche.com').first()
-    #     # current_app.logger.info(__name__)
-    #     # current_app.logger.info('islogin %s' % (current_user.is_authenticated))
-    #     # current_app.logger.info('login_developer_user')
-    #     # current_app.logger.info(user)
-    #     # current_app.logger.info('role_id %s' % (dir(current_user)))
-    #     # current_app.logger.info('role_id %s' % (current_user.role_info))
-    #     login_user(user)
-    #     # user_id => space_id
-    #     session['space_id'] = 3
-    #     session['group_id'] = 1
-    #     current_user.space_id = 3
-    #     current_user.role_name = 'master'
-    #     current_app.logger.info('current_user space_id %s' % (current_user.space_id))
-    #     # current_app.logger.info('islogin %s' % (current_user.is_authenticated))
+    def __init__(self):
+        spaces = current_user.has_spaces()
+        # 记录空间列表, 当前空间
+        current_app.logger.info(spaces)
+        if 'space_id' not in session \
+                or not session['space_id'] \
+                or session['space_id'] not in spaces.keys():
+            session['space_id'] = spaces.keys()[0]
+            session['space_info'] = spaces[session['space_id']]
+            session['space_list'] = spaces.values()
+        # session['space_id'] = spaces.keys()[0]
+        # session['space_info'] = spaces[session['space_id']]
+        # session['space_list'] = spaces.values()
 
+        # 记录当前空间的角色
+        filters = {
+            MemberModel.source_type == MemberModel.source_type_group,
+            MemberModel.source_id == session['space_id'],
+        }
+        member = MemberModel.query.filter(*filters).first()
+        session['space_role'] = member.access_level
 
     @staticmethod
     def render_json(code=0, message='', data=[]):
@@ -130,7 +130,6 @@ class SecurityResource(ApiResource):
     def is_super(func):
         @wraps(func)
         def is_enable(*args, **kwargs):
-            # current_app.logger.info(dir(current_user.role_info))
             if current_user.role_info.name <> 'super':
                 return ApiResource.render_json(code=403, message=u'无操作权限')
             current_app.logger.info("user is login: %s" % (current_user.is_authenticated))
@@ -143,8 +142,6 @@ class SecurityResource(ApiResource):
     def is_master(func):
         @wraps(func)
         def is_enable(*args, **kwargs):
-            current_app.logger.info(dir(current_user.role_info))
-            current_app.logger.info(current_user.role_info)
             if current_user.role_info.name not in ['super', 'master']:
                 return ApiResource.render_json(code=403, message=u'无操作权限')
             current_app.logger.info("user is login: %s" % (current_user.is_authenticated))

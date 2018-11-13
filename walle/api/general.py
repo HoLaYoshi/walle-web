@@ -11,7 +11,7 @@
 import os
 from flask import request, abort, session, current_app
 from flask_login import current_user
-from walle.api.api import ApiResource
+from walle.api.api import SecurityResource
 from walle.model.deploy import TaskRecordModel
 from walle.model.user import MenuModel
 from walle.model.user import UserModel
@@ -21,7 +21,7 @@ from walle.service.rbac.role import *
 from werkzeug.utils import secure_filename
 
 
-class GeneralAPI(ApiResource):
+class GeneralAPI(SecurityResource):
     actions = ['menu', 'websocket']
 
     def get(self, action):
@@ -48,7 +48,6 @@ class GeneralAPI(ApiResource):
 
     def menu(self):
         role = 10
-        current_app.logger.info(current_user.id)
         user = UserModel(id=current_user.id).item()
         menu = MenuModel().menu(role=role)
         space = {
@@ -58,19 +57,9 @@ class GeneralAPI(ApiResource):
         # TODO
         # 超管不需要展示空间列表
         if current_user.role <> SUPER:
-            spaces = current_user.has_spaces()
-            current_app.logger.info(spaces)
-
-            if 'space_id' not in session \
-                    or not session['space_id'] \
-                    or session['space_id'] not in spaces.keys():
-                session['space_id'] = spaces.keys()[0]
-
-            space = spaces[session['space_id']]
-
             space = {
-                'current': space,
-                'available': current_user.has_spaces().values(),
+                'current': session['space_info'],
+                'available': session['space_list'],
             }
         data = {
             'user': user,
@@ -79,22 +68,10 @@ class GeneralAPI(ApiResource):
         }
         return self.render_json(data=data)
 
-    def avater(self):
-        UPLOAD_FOLDER = 'fe/public/avater'
-        f = request.files['avater']
-        fname = secure_filename(f.filename)
-        # todo rename to uid relation
-        fname = secure_filename(f.filename)
-        ret = f.save(os.path.join(UPLOAD_FOLDER, fname))
-
-        return self.render_json(data={
-            'avarter': fname,
-        })
-
     def mail(self):
         ret = emails.send_email('wushuiyong@renrenche.com', 'email from service@walle-web.io', 'xxxxxxx', 'yyyyyyy')
         return self.render_json(data={
-            'avarter': 'emails.send_email',
+            'avatar': 'emails.send_email',
             'done': ret,
         })
 
