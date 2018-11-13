@@ -504,7 +504,7 @@ class MemberModel(SurrogatePK, Model):
     user_id = db.Column(Integer, db.ForeignKey('users.id'))
     source_id = db.Column(Integer)
     source_type = db.Column(String(10))
-    access_level = db.Column(Integer)
+    access_level = db.Column(String(10))
     status = db.Column(Integer)
     created_at = db.Column(DateTime, default=current_time)
     updated_at = db.Column(DateTime, default=current_time, onupdate=current_time)
