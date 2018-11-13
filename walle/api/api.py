@@ -26,37 +26,11 @@ class ApiResource(Resource):
 
     # TODO 权限验证
     def __init__(self):
-        spaces = current_user.has_spaces()
-        # 记录空间列表, 当前空间
-        current_app.logger.info(spaces)
-        if 'space_id' not in session \
-                or not session['space_id'] \
-                or session['space_id'] not in spaces.keys():
-            session['space_id'] = spaces.keys()[0]
-            session['space_info'] = spaces[session['space_id']]
-            session['space_list'] = spaces.values()
-        # session['space_id'] = spaces.keys()[0]
-        # session['space_info'] = spaces[session['space_id']]
-        # session['space_list'] = spaces.values()
-
-        # 记录当前空间的角色
-        filters = {
-            MemberModel.source_type == MemberModel.source_type_group,
-            MemberModel.source_id == session['space_id'],
-        }
-        member = MemberModel.query.filter(*filters).first()
-        if not member:
-            return self.render_json(code=Code.space_error)
-
-        session['space_role'] = member.access_level
+        pass
 
     @staticmethod
     def render_json(code=0, message='', data=[]):
-        return jsonify({
-            'code': code,
-            'message': message,
-            'data': data,
-        })
+        return ApiResource.json(code=code, message=message, data=data)
 
     @staticmethod
     def json(code=0, message=None, data=[]):

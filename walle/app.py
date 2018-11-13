@@ -3,12 +3,13 @@
 import logging
 import sys, os
 
-from flask import Flask, render_template, current_app, jsonify
+from flask import Flask, render_template, current_app, session
 from flask_restful import Api
 from tornado.ioloop import IOLoop
 from tornado.web import Application, FallbackHandler
 from tornado.wsgi import WSGIContainer
 from walle import commands
+from walle.api.api import ApiResource
 from walle.api import access as AccessAPI
 from walle.api import api as BaseAPI
 from walle.api import deploy as DeployAPI
@@ -26,11 +27,12 @@ from walle.api import repo as RepoApi
 from walle.config.settings_dev import DevConfig
 from walle.config.settings_test import TestConfig
 from walle.config.settings_prod import ProdConfig
-from walle.model.user import UserModel
+from walle.model.user import UserModel, MemberModel
 from walle.service.extensions import bcrypt, csrf_protect, db, migrate
 from walle.service.extensions import login_manager, mail
 from walle.service.websocket import WSHandler
 from walle.service.code import Code
+from flask_login import current_user
 
 
 # TODO 添加到这,则对单测有影响
@@ -53,6 +55,29 @@ def create_app(config_object=ProdConfig):
     @app.before_request
     def before_request():
         # TODO
+        spaces = current_user.has_spaces()
+        # 记录空间列表, 当前空间
+        current_app.logger.info(spaces)
+        if 'space_id' not in session \
+                or not session['space_id'] \
+                or session['space_id'] not in spaces.keys():
+            session['space_id'] = spaces.keys()[0]
+            session['space_info'] = spaces[session['space_id']]
+            session['space_list'] = spaces.values()
+        # session['space_id'] = spaces.keys()[0]
+        # session['space_info'] = spaces[session['space_id']]
+        # session['space_list'] = spaces.values()
+
+        # 记录当前空间的角色
+        filters = {
+            MemberModel.source_type == MemberModel.source_type_group,
+            MemberModel.source_id == session['space_id'],
+        }
+        member = MemberModel.query.filter(*filters).first()
+        if not member:
+            return ApiResource.render_json(code=Code.space_error)
+
+        session['space_role'] = member.access_level
         app.logger.info('============ @app.before_request ============')
 
     @app.teardown_request
