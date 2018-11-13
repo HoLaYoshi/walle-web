@@ -3,7 +3,7 @@
 import logging
 import sys, os
 
-from flask import Flask, render_template, current_app, session
+from flask import Flask, render_template, current_app, session,request
 from flask_restful import Api
 from tornado.ioloop import IOLoop
 from tornado.web import Application, FallbackHandler
@@ -54,31 +54,37 @@ def create_app(config_object=ProdConfig):
 
     @app.before_request
     def before_request():
+        current_app.logger.info(dir(request))
+        current_app.logger.info(request.endpoint)
+        # current_app.logger.info(request)
+        # current_app.logger.info(app.request_class.url_rule)
         # TODO
-        spaces = current_user.has_spaces()
-        # 记录空间列表, 当前空间
-        current_app.logger.info(spaces)
-        if 'space_id' not in session \
-                or not session['space_id'] \
-                or session['space_id'] not in spaces.keys():
-            session['space_id'] = spaces.keys()[0]
-            session['space_info'] = spaces[session['space_id']]
-            session['space_list'] = spaces.values()
-        # session['space_id'] = spaces.keys()[0]
-        # session['space_info'] = spaces[session['space_id']]
-        # session['space_list'] = spaces.values()
+        is_allow = ['passport']
+        if request.endpoint not in is_allow and current_user.role <> 'SUPER':
+            spaces = current_user.has_spaces()
+            # 记录空间列表, 当前空间
+            current_app.logger.info(spaces)
+            if 'space_id' not in session \
+                    or not session['space_id'] \
+                    or session['space_id'] not in spaces.keys():
+                session['space_id'] = spaces.keys()[0]
+                session['space_info'] = spaces[session['space_id']]
+                session['space_list'] = spaces.values()
+            # session['space_id'] = spaces.keys()[0]
+            # session['space_info'] = spaces[session['space_id']]
+            # session['space_list'] = spaces.values()
 
-        # 记录当前空间的角色
-        filters = {
-            MemberModel.source_type == MemberModel.source_type_group,
-            MemberModel.source_id == session['space_id'],
-        }
-        member = MemberModel.query.filter(*filters).first()
-        if not member:
-            return ApiResource.render_json(code=Code.space_error)
+            # 记录当前空间的角色
+            filters = {
+                MemberModel.source_type == MemberModel.source_type_group,
+                MemberModel.source_id == session['space_id'],
+            }
+            member = MemberModel.query.filter(*filters).first()
+            if not member:
+                return ApiResource.render_json(code=Code.space_error)
 
-        session['space_role'] = member.access_level
-        app.logger.info('============ @app.before_request ============')
+            session['space_role'] = member.access_level
+            app.logger.info('============ @app.before_request ============')
 
     @app.teardown_request
     def shutdown_session(exception=None):
