@@ -480,7 +480,7 @@ class RoleModel(object):
     def menu_url(cls, url):
         if url == '/':
             return url
-        prefix = 'admin' if g.role == SUPER else session['space_name']
+        prefix = 'admin' if g.role == SUPER else session['space_info']['name']
 
         return '/' + prefix + url
 
