@@ -16,8 +16,8 @@ from walle.model.deploy import TaskRecordModel
 from walle.model.user import MenuModel
 from walle.model.user import UserModel
 from walle.service import emails
-from walle.service.rbac.role import *
 from walle.service.deployer import Deployer
+from walle.service.rbac.role import *
 from werkzeug.utils import secure_filename
 
 
@@ -51,8 +51,11 @@ class GeneralAPI(ApiResource):
         current_app.logger.info(current_user.id)
         user = UserModel(id=current_user.id).item()
         menu = MenuModel().menu(role=role)
+        space = {
+            'current': '',
+            'available': '',
+        }
         # TODO
-        space = []
         # 超管不需要展示空间列表
         if current_user.role <> SUPER:
             spaces = current_user.has_spaces()
