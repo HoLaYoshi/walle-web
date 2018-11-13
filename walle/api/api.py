@@ -45,6 +45,9 @@ class ApiResource(Resource):
             MemberModel.source_id == session['space_id'],
         }
         member = MemberModel.query.filter(*filters).first()
+        if not member:
+            return self.render_json(code=Code.space_error)
+
         session['space_role'] = member.access_level
 
     @staticmethod

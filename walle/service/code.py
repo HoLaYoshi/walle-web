@@ -14,7 +14,11 @@ class Code():
     #: 未登录, 大概是永远不会变了
     unlogin = 1000
 
+    #: 无此权限
     not_allow = 1001
+
+    #: 无此空间权限
+    space_error = 1002
 
 
     #: 2xxx 表示参数错误
@@ -25,6 +29,7 @@ class Code():
         unlogin: '未登录',
         not_allow: '无此权限',
         params_error: '参数错误',
+        space_error: '无此空间权限',
     }
 
 
