@@ -721,7 +721,8 @@ class SpaceModel(SurrogatePK, Model):
             query = query.filter(SpaceModel.name.like('%' + kw + '%'))
 
         # TODO 如果是超管,可以全量,否则需要过滤自己有权限的空间列表
-        query = query.filter_by(user_id=g.id)
+        if g.role <> SUPER:
+            query = query.filter_by(user_id=g.id)
         count = query.count()
         data = query.order_by('id desc').offset(int(size) * int(page)).limit(size).all()
 
