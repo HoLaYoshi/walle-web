@@ -133,6 +133,13 @@ class UserModel(UserMixin, SurrogatePK, Model):
       "username",
       "verify_password"
     '''
+    def add(self, *args, **kwargs):
+        data = dict(*args)
+        user = UserModel(**data)
+
+        db.session.add(user)
+        db.session.commit()
+        return user
 
     def item(self, user_id=None):
         """

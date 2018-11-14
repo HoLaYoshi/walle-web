@@ -80,12 +80,7 @@ class UserAPI(SecurityResource):
         form = RegistrationForm(request.form, csrf_enabled=False)
         if form.validate_on_submit():
             password = generate_password_hash(form.password.data)
-            user = UserModel(email=form.email.data,
-                             username=form.username.data,
-                             password=password,
-                             )
-            db.session.add(user)
-            db.session.commit()
+            user = UserModel().add(form.form2dict())
             return self.render_json(data=user.item(user_id=user.id))
         return self.render_json(code=-1, message=form.errors)
 

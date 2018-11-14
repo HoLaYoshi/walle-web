@@ -19,22 +19,34 @@ from walle.model.user import RoleModel
 from walle.model.user import UserModel
 from flask import current_app
 import re
+from werkzeug.security import generate_password_hash
 
 class UserForm(FlaskForm):
-    pass
-
-
-class RegistrationForm(Form):
     email = TextField('Email Address', [validators.email()])
     password = PasswordField('Password', [validators.Length(min=6, max=35),
                                           validators.Regexp(regex="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}",
                               message='密码至少6个字符，至少1个大写字母，1个小写字母，1个数字')])
 
     username = TextField('Username', [validators.Length(min=1, max=50)])
+    role = TextField('role', [])
 
     def validate_email(self, field):
-        if UserModel.query.filter_by(email=field.data).first():
-            raise ValidationError('Email already register')
+            if UserModel.query.filter_by(email=field.data).first():
+                raise ValidationError('Email already register')
+
+    def form2dict(self):
+        generate_password_hash(self.password.data)
+        return {
+            'name': self.username.data,
+            'password': generate_password_hash(self.password.data),
+            'username': self.username.data,
+            'role': self.role.data if self.role.data else '',
+        }
+
+
+class RegistrationForm(UserForm):
+
+    pass
 
 
 class UserUpdateForm(Form):
