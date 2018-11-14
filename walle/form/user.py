@@ -35,9 +35,8 @@ class UserForm(FlaskForm):
                 raise ValidationError('Email already register')
 
     def form2dict(self):
-        generate_password_hash(self.password.data)
         return {
-            'name': self.username.data,
+            'username': self.username.data,
             'password': generate_password_hash(self.password.data),
             'username': self.username.data,
             'role': self.role.data if self.role.data else '',
