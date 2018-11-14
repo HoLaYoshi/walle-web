@@ -38,7 +38,7 @@ class UserForm(FlaskForm):
         return {
             'username': self.username.data,
             'password': generate_password_hash(self.password.data),
-            'username': self.username.data,
+            'email': self.email.data,
             'role': self.role.data if self.role.data else '',
         }
 
