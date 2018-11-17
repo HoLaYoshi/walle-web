@@ -6,7 +6,11 @@
     :created time: 2018-11-04 22:08:28
     :author: wushuiyong@walle-web.io
 """
-
+from flask import current_app, session
+from flask_login import login_required, current_user
+from functools import wraps
+from walle.service.code import Code
+from walle.service.error import WalleError
 
 GUEST = 'GUEST'
 REPORT = 'REPORT'
@@ -34,6 +38,39 @@ ROLE_ACCESS = {
 }
 
 class Permission():
+
+    app = None
+
+    def __init__(self, app=None):
+        if app:
+            self.init_app(app)
+
+    def init_app(self, app):
+        self.app = app
+
+    def gte_develop_or_uid(self, func):
+        @wraps(func)
+        @login_required
+        def decorator(*args, **kwargs):
+            current_app.logger.info('============== gte_develop_or_uid.decorator ======')
+            if self.is_gte_develop_or_uid(current_user.id):
+                current_app.logger.info('============== gte_develop_or_uid.if ======')
+                return func(*args, **kwargs)
+
+            raise WalleError(Code.not_allow)
+
+        return decorator
+
+    def is_gte_develop_or_uid(self, uid=None):
+        if uid is None:
+            uid = current_user.id
+        current_app.logger.info( Permission.enable_uid(uid))
+        current_app.logger.info(Permission.enable_role(DEVELOPER))
+
+        if Permission.enable_uid(uid) or Permission.enable_role(DEVELOPER):
+            return True
+
+        return False
 
     @staticmethod
     def list_enable(self, list, access_level):
@@ -67,16 +104,20 @@ class Permission():
         :param uid:
         :return:
         '''
-        return True
+        # TODO
+        current_app.logger.info(current_user.id)
+        current_app.logger.info(uid)
+        return current_user.id == uid
 
     @classmethod
     def enable_role(cls, role):
         '''
-        当前角色 > 数据项角色
+        当前角色 >= 数据项角色
         :param role:
         :return:
         '''
-        current_role = SUPER
+        # TODO about project/task
+        current_role = session['space_info']['role']
         return cls.compare_role(current_role, role)
 
     @classmethod

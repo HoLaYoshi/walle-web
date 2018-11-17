@@ -47,6 +47,7 @@ class PassportAPI(ApiResource):
 
             if user is not None and user.verify_password(form.password.data):
                 login_user(user)
+                user.fresh_session()
                 return self.render_json(data=current_user.to_json())
 
         return self.render_json(code=-1, data=form.errors)

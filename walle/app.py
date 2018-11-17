@@ -3,7 +3,7 @@
 import logging
 import sys, os
 
-from flask import Flask, render_template, current_app, session,request
+from flask import Flask, render_template, current_app, session,request, abort, Response
 from flask_restful import Api
 from tornado.ioloop import IOLoop
 from tornado.web import Application, FallbackHandler
@@ -29,8 +29,10 @@ from walle.config.settings_test import TestConfig
 from walle.config.settings_prod import ProdConfig
 from walle.model.user import UserModel, MemberModel
 from walle.service.extensions import bcrypt, csrf_protect, db, migrate
-from walle.service.extensions import login_manager, mail
+from walle.service.extensions import login_manager, mail, permission
+from walle.service.error import WalleError
 from walle.service.websocket import WSHandler
+
 from walle.service.code import Code
 from flask_login import current_user
 
@@ -54,37 +56,10 @@ def create_app(config_object=ProdConfig):
 
     @app.before_request
     def before_request():
-        current_app.logger.info(dir(request))
-        current_app.logger.info(request.endpoint)
         # current_app.logger.info(request)
         # current_app.logger.info(app.request_class.url_rule)
         # TODO
-        is_allow = ['passport']
-        if request.endpoint not in is_allow and current_user.role <> 'SUPER':
-            spaces = current_user.has_spaces()
-            # 记录空间列表, 当前空间
-            current_app.logger.info(spaces)
-            if 'space_id' not in session \
-                    or not session['space_id'] \
-                    or session['space_id'] not in spaces.keys():
-                session['space_id'] = spaces.keys()[0]
-                session['space_info'] = spaces[session['space_id']]
-                session['space_list'] = spaces.values()
-            # session['space_id'] = spaces.keys()[0]
-            # session['space_info'] = spaces[session['space_id']]
-            # session['space_list'] = spaces.values()
-
-            # 记录当前空间的角色
-            filters = {
-                MemberModel.source_type == MemberModel.source_type_group,
-                MemberModel.source_id == session['space_id'],
-            }
-            member = MemberModel.query.filter(*filters).first()
-            if not member:
-                return ApiResource.render_json(code=Code.space_error)
-
-            session['space_role'] = member.access_level
-            app.logger.info('============ @app.before_request ============')
+        app.logger.info('============ @app.before_request ============')
 
     @app.teardown_request
     def shutdown_session(exception=None):
@@ -120,19 +95,25 @@ def register_extensions(app):
     @login_manager.user_loader
     def load_user(user_id):
         current_app.logger.info(user_id)
+        app.logger.info('============ @app.user_loader ============')
+
         return UserModel.query.get(user_id)
+
 
     @login_manager.unauthorized_handler
     def unauthorized():
         # TODO log
+        current_app.logger.info('============ @login_manager.unauthorized_handler ============')
+        # return Response(ApiResource.render_json(code=Code.space_error))
         return BaseAPI.ApiResource.json(code=Code.unlogin)
+
     login_manager.init_app(app)
 
     migrate.init_app(app, db)
     mail.init_app(app)
+    permission.init_app(app)
 
-
-    return None
+    return app
 
 
 def register_blueprints(app):
@@ -159,16 +140,21 @@ def register_blueprints(app):
 
 def register_errorhandlers(app):
     """Register error handlers."""
-
+    @app.errorhandler(WalleError)
     def render_error(error):
-        """Render error template."""
-        # If a HTTPException, pull the `code` attribute; default to 500
-        error_code = getattr(error, 'code', 500)
-        return render_template('{0}.html'.format(error_code)), error_code
+        app.logger.info('============ register_errorhandlers ============')
+        # response 的 json 内容为自定义错误代码和错误信息
+        return error.render_error()
 
-    for errcode in [401, 404, 500]:
-        app.errorhandler(errcode)(render_error)
-    return None
+    def render_errors():
+
+        """Render error template."""
+        app.logger.info('============ render_errors ============')
+        # If a HTTPException, pull the `code` attribute; default to 500
+        return ApiResource.render_json(code=Code.space_error)
+    #
+    #     error_code = getattr(error, 'code', 500)
+    #     return render_template('{0}.html'.format(error_code)), error_code
 
 
 def register_shellcontext(app):

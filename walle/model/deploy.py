@@ -12,6 +12,7 @@ from datetime import datetime
 from walle.model.database import SurrogatePK, db, Model
 from walle.model.user import UserModel
 from walle.service.rbac.role import *
+from walle.service.extensions import permission
 
 
 # 上线单
@@ -479,7 +480,7 @@ class ProjectModel(SurrogatePK, Model):
     created_at = db.Column(DateTime, default=current_time)
     updated_at = db.Column(DateTime, default=current_time, onupdate=current_time)
 
-    def list(self, page=0, size=10, kw=None, environment_id=None):
+    def list(self, page=0, size=10, kw=None, space_id=None, environment_id=None):
         """
         获取分页列表
         :param page:
@@ -492,6 +493,8 @@ class ProjectModel(SurrogatePK, Model):
 
         if environment_id:
             query = query.filter_by(environment_id=environment_id)
+        if space_id:
+            query = query.filter_by(space_id=space_id)
         count = query.count()
         data = query.order_by('id desc').offset(int(size) * int(page)).limit(size).all()
         list = [p.to_json() for p in data]
@@ -583,14 +586,16 @@ class ProjectModel(SurrogatePK, Model):
         return item
 
     def enable(self):
+        current_app.logger.info(self.id)
         return {
-            'enable_update': Permission.enable_uid(self.user_id) or Permission.enable_role(DEVELOPER),
-            'enable_delete': Permission.enable_uid(self.user_id) or Permission.enable_role(DEVELOPER),
+            'enable_update': permission.is_gte_develop_or_uid(self.user_id),
+            'enable_delete': permission.enable_uid(self.user_id) or permission.enable_role(DEVELOPER),
             'enable_create': False,
             'enable_online': False,
             'enable_audit': False,
             'enable_block': False,
         }
+
 
 class TagModel(SurrogatePK, Model):
     # 表的名字:

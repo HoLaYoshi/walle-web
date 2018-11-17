@@ -15,8 +15,9 @@ from walle.model.database import SurrogatePK, db, Model
 from walle.model.tag import TagModel
 from sqlalchemy.orm import aliased
 from walle.service.rbac.access import Access as AccessRbac
-from flask import current_app, session
+from flask import current_app, session, abort
 from walle.service.rbac.role import *
+from walle.service.error import WalleError
 from flask_login import current_user as g
 
 import walle.model
@@ -38,6 +39,7 @@ class UserModel(UserMixin, SurrogatePK, Model):
     avatar = db.Column(String(100))
     role = db.Column(String(10))
     status = db.Column(Integer, default=1)
+    last_space = db.Column(Integer, default=0)
     # role_info = relationship("walle.model.user.RoleModel", back_populates="users")
     created_at = db.Column(DateTime, default=current_time)
     updated_at = db.Column(DateTime, default=current_time, onupdate=current_time)
@@ -263,8 +265,35 @@ class UserModel(UserMixin, SurrogatePK, Model):
         return user_list, count
 
     def has_spaces(self):
-        spaces, count = SpaceModel().list()
-        return {space['id']: {'id': space['id'], 'name': space['name']} for space in spaces}
+        return MemberModel().spaces(user_id=self.id)
+
+    @classmethod
+    def fresh_session(cls):
+        spaces = current_user.has_spaces()
+        default_space = spaces.keys()[0]
+        current_app.logger.info('============ passport.flesh_session ============')
+
+        # 1.无空间权限
+        if spaces is None:
+            raise WalleError(Code.space_error)
+
+        # 2.第一次登录无空间
+        if not current_user.last_space:
+            current_user.last_space = default_space
+            current_user.save()
+            session['space_id'] = default_space
+            session['space_info'] = spaces[session['space_id']]
+
+        # 3.空间权限有修改
+        if current_user.last_space and current_user.last_space not in spaces.keys():
+            raise WalleError(Code.space_error)
+
+        session['space_id'] = current_user.last_space
+        session['space_info'] = spaces[current_user.last_space]
+        session['space_list'] = spaces.values()
+
+        current_app.logger.info('============ SecurityResource.__init__ ============')
+
 
     @classmethod
     def avatar_url(cls, avatar):
@@ -313,6 +342,7 @@ class UserModel(UserMixin, SurrogatePK, Model):
             # TODO 当前登录用户的空间
             # 'role_id': self.role_id,
             'status': self.status_mapping[self.status],
+            'last_space': self.last_space,
             # 'status': self.status,
             # 'role_name': self.role_id,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
@@ -516,7 +546,7 @@ class MemberModel(SurrogatePK, Model):
 
     # TODO group id全局化
 
-    def list(self, page=0, size=10, kw=None):
+    def spaces(self, user_id=None):
         """
         获取分页列表
         :param page:
@@ -525,8 +555,42 @@ class MemberModel(SurrogatePK, Model):
         """
         filters = {
             MemberModel.status.notin_([self.status_remove]),
-            MemberModel.source_id == source_id
+            MemberModel.source_type == self.source_type_group
         }
+        query = self.query.filter(*filters).with_labels().with_entities(MemberModel.source_id, MemberModel.access_level, SpaceModel.name)
+        if user_id:
+            query = query.filter_by(user_id=user_id)
+
+        query = query.join(SpaceModel, SpaceModel.id==MemberModel.source_id)
+
+        spaces = query.all()
+        current_app.logger.info(spaces)
+        return {space[0]: {'id': space[0], 'role': space[1], 'name': space[2]} for space in spaces}
+
+
+    def projects(self, user_id=None, space_id=None):
+        """
+        获取分页列表
+        :param page:
+        :param size:
+        :return:
+        """
+        filters = {
+            MemberModel.status.notin_([self.status_remove]),
+            MemberModel.source_type == self.source_type_project
+        }
+        query = self.query.filter(*filters)
+        if user_id:
+            query = query.filter_by(user_id=user_id)
+
+        # if project_id:
+        #     query = query.filter_by(source_id=project_id)
+
+        projects = query.all()
+        current_app.logger.info(projects)
+
+        return projects
+
         group, count = MemberModel.query_paginate(page=page, limit=size, filter_name_dict=filters)
 
         list = [p.to_json() for p in group]

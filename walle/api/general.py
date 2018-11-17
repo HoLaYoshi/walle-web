@@ -10,7 +10,7 @@
 
 import os
 from flask import request, abort, session, current_app
-from flask_login import current_user
+from flask_login import current_user, login_required
 from walle.api.api import SecurityResource
 from walle.model.deploy import TaskRecordModel
 from walle.model.user import MenuModel
@@ -19,11 +19,13 @@ from walle.service import emails
 from walle.service.deployer import Deployer
 from walle.service.rbac.role import *
 from werkzeug.utils import secure_filename
+from walle.service.extensions import permission
 
 
 class GeneralAPI(SecurityResource):
     actions = ['menu', 'websocket']
 
+    @permission.gte_develop_or_uid
     def get(self, action):
         """
         fetch role list or one role
@@ -43,7 +45,7 @@ class GeneralAPI(SecurityResource):
 
         :return:
         """
-        if action == 'avater':
+        if action == 'avatar':
             return self.avater()
 
     def menu(self):

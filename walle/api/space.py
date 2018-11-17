@@ -11,7 +11,7 @@
 from flask import request, current_app, session
 from walle.api.api import SecurityResource
 from walle.form.space import SpaceForm
-from walle.model.user import SpaceModel, MemberModel
+from walle.model.user import SpaceModel, MemberModel, UserModel
 import json
 from walle.service.rbac.role import *
 
@@ -127,4 +127,9 @@ class SpaceAPI(SecurityResource):
 
     def switch(self, space_id):
         session['space_id'] = space_id
+
+        # TODO
+        current_user.last_space = space_id
+        current_user.save()
+        UserModel.fresh_session()
         return self.render_json()

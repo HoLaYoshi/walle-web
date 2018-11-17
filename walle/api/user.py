@@ -153,7 +153,6 @@ class UserAPI(SecurityResource):
         fname = random[-10:] + '.jpg'
         current_app.logger.info(fname)
 
-        UPLOAD_FOLDER = 'fe/public/avater'
         f = request.files['avatar']
         # todo rename to uid relation
         # fname = secure_filename(f.filename)
