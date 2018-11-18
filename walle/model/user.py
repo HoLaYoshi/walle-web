@@ -249,7 +249,7 @@ class UserModel(UserMixin, SurrogatePK, Model):
         except NameError:
             return str(self.id)  # python 3
 
-    def list(self, page=0, size=10, kw=None):
+    def list(self, uids=[], page=0, size=10, kw=None):
         """
         获取分页列表
         :param page:
@@ -259,6 +259,9 @@ class UserModel(UserMixin, SurrogatePK, Model):
         query = UserModel.query.filter(UserModel.status.notin_([self.status_remove]))
         if kw:
             query = query.filter(or_(UserModel.username.like('%' + kw + '%'), UserModel.email.like('%' + kw + '%')))
+        if uids:
+            query = query.filter(UserModel.id.in_(uids))
+
         count = query.count()
         data = query.order_by('id desc').offset(int(size) * int(page)).limit(size).all()
         user_list = [p.to_json() for p in data]

@@ -44,13 +44,18 @@ class UserAPI(SecurityResource):
         size = float(request.args.get('size', 10))
         kw = request.values.get('kw', '')
 
+        uids = []
+        if current_user.role <> SUPER:
+            members = MemberModel(group_id=current_user.last_space).members()
+            uids = members['user_ids']
+
         user_model = UserModel()
-        user_list, count = user_model.list(page=page, size=size, kw=kw)
-        filter = {
+        user_list, count = user_model.list(uids=uids, page=page, size=size, kw=kw)
+        filters = {
             'username': ['线上', '线下'],
             'status': ['正常', '禁用']
         }
-        return self.list_json(list=user_list, count=count, table=self.table(filter), enable_create=Permission.enable_role(MASTER))
+        return self.list_json(list=user_list, count=count, table=self.table(filters), enable_create=Permission.enable_role(MASTER))
 
     def item(self, user_id):
         """
