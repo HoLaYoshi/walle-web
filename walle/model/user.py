@@ -275,7 +275,7 @@ class UserModel(UserMixin, SurrogatePK, Model):
         spaces = current_user.has_spaces()
 
         # 1.无空间权限
-        if spaces is None:
+        if not spaces:
             raise WalleError(Code.space_empty)
 
         default_space = spaces.keys()[0]

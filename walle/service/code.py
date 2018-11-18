@@ -32,7 +32,7 @@ class Code():
         unlogin: '未登录',
         not_allow: '无此权限',
         params_error: '参数错误',
-        space_empty: '尚未开通空间',
+        space_empty: '尚未开通空间, 请联系空间负责人加入空间',
         space_error: '无此空间权限',
     }
 
