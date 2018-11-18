@@ -273,13 +273,12 @@ class UserModel(UserMixin, SurrogatePK, Model):
     @classmethod
     def fresh_session(cls):
         spaces = current_user.has_spaces()
-        default_space = spaces.keys()[0]
-        current_app.logger.info('============ passport.flesh_session ============')
 
         # 1.无空间权限
         if spaces is None:
-            raise WalleError(Code.space_error)
+            raise WalleError(Code.space_empty)
 
+        default_space = spaces.keys()[0]
         # 2.第一次登录无空间
         if not current_user.last_space:
             current_user.last_space = default_space

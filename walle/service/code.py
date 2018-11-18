@@ -17,8 +17,11 @@ class Code():
     #: 无此权限
     not_allow = 1001
 
+    #: 尚未开通空间
+    space_empty = 1002
+
     #: 无此空间权限
-    space_error = 1002
+    space_error = 1003
 
 
     #: 2xxx 表示参数错误
@@ -29,6 +32,7 @@ class Code():
         unlogin: '未登录',
         not_allow: '无此权限',
         params_error: '参数错误',
+        space_empty: '尚未开通空间',
         space_error: '无此空间权限',
     }
 
