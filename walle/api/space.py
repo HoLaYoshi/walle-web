@@ -14,6 +14,7 @@ from walle.form.space import SpaceForm
 from walle.model.user import SpaceModel, MemberModel, UserModel
 import json
 from walle.service.rbac.role import *
+from walle.service.extensions import permission
 
 class SpaceAPI(SecurityResource):
 
@@ -41,7 +42,7 @@ class SpaceAPI(SecurityResource):
 
         space_model = SpaceModel()
         space_list, count = space_model.list(page=page, size=size, kw=kw)
-        return self.list_json(list=space_list, count=count, enable_create=Permission.enable_role(OWNER))
+        return self.list_json(list=space_list, count=count, enable_create=permission.enable_role(OWNER))
 
     def item(self, space_id):
         """

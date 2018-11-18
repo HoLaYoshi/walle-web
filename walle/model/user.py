@@ -19,6 +19,7 @@ from flask import current_app, session, abort
 from walle.service.rbac.role import *
 from walle.service.error import WalleError
 from flask_login import current_user as g
+from walle.service.extensions import permission
 
 import walle.model
 
@@ -355,8 +356,8 @@ class UserModel(UserMixin, SurrogatePK, Model):
 
     def enable(self):
         return {
-            'enable_update': Permission.enable_role(DEVELOPER),
-            'enable_delete': Permission.enable_role(DEVELOPER),
+            'enable_update': permission.enable_role(DEVELOPER),
+            'enable_delete': permission.enable_role(DEVELOPER),
             'enable_create': False,
             'enable_online': False,
             'enable_audit': False,
@@ -873,11 +874,11 @@ class SpaceModel(SurrogatePK, Model):
 
     def enable(self):
         return {
-            'enable_update': Permission.enable_uid(self.user_id) or Permission.enable_role(OWNER),
-            'enable_delete': Permission.enable_uid(self.user_id) or Permission.enable_role(OWNER),
+            'enable_update': permission.enable_uid(self.user_id) or permission.enable_role(OWNER),
+            'enable_delete': permission.enable_uid(self.user_id) or permission.enable_role(OWNER),
             'enable_create': False,
             'enable_online': False,
             'enable_audit': False,
-            'enable_block': Permission.enable_role(MASTER),
+            'enable_block': permission.enable_role(MASTER),
         }
 

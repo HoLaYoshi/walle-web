@@ -162,11 +162,11 @@ class TaskModel(SurrogatePK, Model):
 
     def enable(self):
         return {
-            'enable_update': Permission.enable_uid(self.user_id) or Permission.enable_role(DEVELOPER),
-            'enable_delete': Permission.enable_uid(self.user_id) or Permission.enable_role(DEVELOPER),
+            # 'enable_update': permission.enable_uid(self.user_id) or permission.enable_role(DEVELOPER),
+            # 'enable_delete': permission.enable_uid(self.user_id) or permission.enable_role(DEVELOPER),
             'enable_create': False,
-            'enable_online': Permission.enable_uid(self.user_id) or Permission.enable_role(DEVELOPER),
-            'enable_audit': Permission.enable_role(DEVELOPER),
+            # 'enable_online': permission.enable_uid(self.user_id) or permission.enable_role(DEVELOPER),
+            # 'enable_audit': permission.enable_role(DEVELOPER),
             'enable_block': False,
         }
 
@@ -198,7 +198,7 @@ class TaskRecordModel(Model):
                                  success=success, error=error)
         db.session.add(record)
         ret = db.session.commit()
-        
+
         return ret
 
     def fetch(self, task_id):
@@ -310,8 +310,8 @@ class EnvironmentModel(Model):
 
     def enable(self):
         return {
-            'enable_update': Permission.enable_role(DEVELOPER),
-            'enable_delete': Permission.enable_role(DEVELOPER),
+            'enable_update': permission.enable_role(DEVELOPER),
+            'enable_delete': permission.enable_role(DEVELOPER),
             'enable_create': False,
             'enable_online': False,
             'enable_audit': False,
@@ -429,12 +429,14 @@ class ServerModel(SurrogatePK, Model):
         return item
 
     def enable(self):
+        # current_app.logger.info(dir(permission.app))
+        current_app.logger.info(permission.enable_uid(3))
         return {
-            'enable_update': Permission.enable_role(DEVELOPER),
-            'enable_delete': Permission.enable_role(DEVELOPER),
+            'enable_update': permission.enable_role(DEVELOPER),
+            # 'enable_delete': permission.enable_role(DEVELOPER),
             'enable_create': False,
             'enable_online': False,
-            'enable_audit': Permission.enable_role(OWNER),
+            # 'enable_audit': permission.enable_role(OWNER),
             'enable_block': False,
         }
 

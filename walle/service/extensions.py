@@ -8,6 +8,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_mail import Mail
 from walle.service.rbac.role import Permission
 
+
 bcrypt = Bcrypt()
 csrf_protect = CSRFProtect()
 db = SQLAlchemy()

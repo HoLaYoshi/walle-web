@@ -9,16 +9,32 @@
 import anyjson as json
 from tornado.websocket import WebSocketHandler
 from flask import current_app
+from flask_login import current_user
 from walle.service.deployer import Deployer
 
 class WSHandler(WebSocketHandler):
     waiters = set()
+
+    app = None
+
+    def init_app(self, app):
+        self.app = app
 
     def check_origin(self, origin):
         return True
 
     def open(self):
         # TODO
+        # from walle.model.user import UserModel
+        # from flask_login import login_user
+        # user = UserModel.query.filter_by(email='wushuiyong-owner@walle-web.io').first()
+        # login_user(user)
+        from flask import session
+
+        ctx = current_app.app_context()
+        ctx.push()
+        current_app.logger.info(session['space_id'])
+
         WSHandler.waiters.add(self)
 
         print 'new connection'
@@ -32,6 +48,7 @@ class WSHandler(WebSocketHandler):
 
 
         wi = Deployer(task_id, websocket=self)
+        current_app.logger.info(current_user.id)
         ret = wi.walle_deploy()
 
         response = json.dumps(dict(output='receive: {0}'.format(task_id)))

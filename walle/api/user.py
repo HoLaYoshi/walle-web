@@ -17,6 +17,7 @@ from walle.model.user import MemberModel
 from walle.model.user import UserModel
 from werkzeug.security import generate_password_hash
 from walle.service.rbac.role import *
+from walle.service.extensions import permission
 
 
 class UserAPI(SecurityResource):
@@ -55,7 +56,7 @@ class UserAPI(SecurityResource):
             'username': ['线上', '线下'],
             'status': ['正常', '禁用']
         }
-        return self.list_json(list=user_list, count=count, table=self.table(filters), enable_create=Permission.enable_role(MASTER))
+        return self.list_json(list=user_list, count=count, table=self.table(filters), enable_create=permission.enable_role(MASTER))
 
     def item(self, user_id):
         """

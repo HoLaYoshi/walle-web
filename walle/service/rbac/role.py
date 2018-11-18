@@ -64,10 +64,8 @@ class Permission():
     def is_gte_develop_or_uid(self, uid=None):
         if uid is None:
             uid = current_user.id
-        current_app.logger.info( Permission.enable_uid(uid))
-        current_app.logger.info(Permission.enable_role(DEVELOPER))
 
-        if Permission.enable_uid(uid) or Permission.enable_role(DEVELOPER):
+        if self.enable_uid(uid) or self.enable_role(DEVELOPER):
             return True
 
         return False
@@ -97,20 +95,22 @@ class Permission():
         }
         pass
 
-    @classmethod
-    def enable_uid(cls, uid):
+    # @classmethod
+    def enable_uid(self, uid):
         '''
         当前登录用户 == 数据用户
         :param uid:
         :return:
         '''
         # TODO
-        current_app.logger.info(current_user.id)
+        # current_app.logger.info(current_user.id)
+        # current_app.logger.info(current_user.is_active())
+        current_app.logger.info(dir(current_user))
         current_app.logger.info(uid)
         return current_user.id == uid
 
-    @classmethod
-    def enable_role(cls, role):
+    # @classmethod
+    def enable_role(self, role):
         '''
         当前角色 >= 数据项角色
         :param role:
@@ -118,10 +118,10 @@ class Permission():
         '''
         # TODO about project/task
         current_role = session['space_info']['role']
-        return cls.compare_role(current_role, role)
+        return self.compare_role(current_role, role)
 
-    @classmethod
-    def compare_role(cls, role_high, role_low):
+    # @classmethod
+    def compare_role(self, role_high, role_low):
         if role_high not in ROLE_ACCESS or role_low not in ROLE_ACCESS:
             # TODO 也可以抛出
             return False
